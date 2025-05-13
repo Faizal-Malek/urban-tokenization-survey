@@ -100,6 +100,7 @@ export function StakeholdersSection() {
       toast.error("Please complete all fields before continuing.");
       return;
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentSection("future");
     toast.success("Stakeholder information saved! Moving to Future Outlook section.");
   };

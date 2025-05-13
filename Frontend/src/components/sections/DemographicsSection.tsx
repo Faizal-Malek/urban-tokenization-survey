@@ -17,6 +17,8 @@ export function DemographicsSection() {
     }
     setCurrentSection("knowledge");
     toast.success("Demographics saved! Moving to Knowledge section.");
+    // Add smooth scrolling to top
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleOccupationChange = (value: string) => {

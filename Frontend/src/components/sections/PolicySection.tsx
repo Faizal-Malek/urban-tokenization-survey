@@ -44,6 +44,7 @@ export function PolicySection() {
       toast.error("Please complete all fields before continuing.");
       return;
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentSection("tokenization");
     toast.success("Policy information saved! Moving to Tokenization section.");
   };

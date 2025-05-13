@@ -21,6 +21,7 @@ export function KnowledgeSection() {
       return;
     }
     
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentSection("policy");
     toast.success("Knowledge and awareness info saved! Moving to Policy section.");
   };

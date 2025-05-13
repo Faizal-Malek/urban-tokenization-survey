@@ -17,6 +17,7 @@ export function FutureSection() {
       return;
     }
     
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     toast.info("Submitting your questionnaire...");
     
     try {

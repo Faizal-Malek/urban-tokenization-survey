@@ -102,6 +102,7 @@ export function TokenizationSection() {
       toast.error("Please complete all fields before continuing.");
       return;
     }
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setCurrentSection("stakeholders");
     toast.success("Tokenization information saved! Moving to Stakeholders section.");
   };
