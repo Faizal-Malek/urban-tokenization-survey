@@ -1,5 +1,4 @@
 import { Questionnaire } from "@/components/Questionnaire";
-import { QuestionnaireProvider } from "@/context/QuestionnaireContext";
 
 const QuestionnaireHome = () => {
   return (
@@ -7,7 +6,6 @@ const QuestionnaireHome = () => {
       {/* Modern Navigation Bar */}
       <nav className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-5xl bg-[#fffbe6]/90 rounded-xl shadow flex items-center justify-between px-8 py-4 border border-yellow-100">
         <div className="flex items-center gap-3">
-          {/* Logo text only, icon removed */}
           <span className="font-bold text-xl text-gray-900">Urban Infrastructure Tokenization Survey</span>
         </div>
         <a 
