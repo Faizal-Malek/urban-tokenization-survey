@@ -4,8 +4,11 @@ import { User } from '../models/user.model';
 import { AppError } from '../middleware/errorHandler';
 
 const signToken = (id: string, role: string) => {
-  return jwt.sign({ id, role }, process.env.JWT_SECRET!, {
-    expiresIn: process.env.JWT_EXPIRES_IN,
+  if (!process.env.JWT_SECRET) {
+    throw new Error('JWT_SECRET is not defined');
+  }
+  return jwt.sign({ id, role }, process.env.JWT_SECRET as string, {
+    expiresIn: '1d'
   });
 };
 
