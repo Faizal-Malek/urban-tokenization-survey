@@ -41,7 +41,12 @@ const AdminDashboard = () => {
       const res = await axios.post(
         "https://urban-tokenization-survey.onrender.com/api/auth/login",
         { username, password },
-        { withCredentials: true }
+        { 
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
       );
       setAuthenticated(true);
     } catch (err) {

@@ -20,8 +20,8 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
 app.use(cors({
-  origin: ["https://urban-tokenization-survey.vercel.app"],
-  credentials: true,
+  origin: 'https://urban-tokenization-survey.vercel.app',
+  credentials: true
 }));
 app.use(cors({
   origin: ["https://urban-tokenization-survey.vercel.app"],
