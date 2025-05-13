@@ -122,7 +122,7 @@ export const QuestionnaireProvider = ({ children }: { children: ReactNode }) => 
     setIsSubmitting(true);
     try {
       await axios.post(
-        "http://146.141.45.34:5000/api/questionnaire",
+        "https://urban-tokenization-survey.onrender.com/api/questionnaire",
         formData,
         { withCredentials: true }
       );

@@ -39,7 +39,7 @@ const AdminDashboard = () => {
     e.preventDefault();
     try {
       const res = await axios.post(
-        "http://146.141.45.34:5000/api/auth/login",
+        "https://urban-tokenization-survey.onrender.com/api/auth/login",
         { username, password },
         { withCredentials: true }
       );
