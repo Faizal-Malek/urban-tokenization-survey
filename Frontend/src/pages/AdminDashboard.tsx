@@ -109,9 +109,6 @@ const AdminDashboard = () => {
                 Login
               </button>
             </form>
-            <p className="mt-4 text-xs text-gray-500 text-center">
-              For demo purposes: Username is <b>admin</b> and password is <b>password</b>
-            </p>
           </div>
         </main>
       </div>
