@@ -20,7 +20,10 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
 app.use(cors({
-  origin: "https://urban-tokenization-survey.vercel.app",
+  origin: [
+    'https://urban-tokenization-survey.vercel.app',
+    'https://urban-tokenization-survey-git-main-faizals-projects-bee3353c.vercel.app'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
