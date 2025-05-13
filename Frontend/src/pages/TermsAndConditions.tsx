@@ -45,7 +45,7 @@ const TermsAndConditions = () => {
             />
           </div>
           
-          <h2 className="text-2xl font-bold mb-6 text-brand-yellow text-center">Invitation</h2>
+          <h2 className="text-2xl font-bold mb-6 text-brand-yellow text-center uppercase">Invitation</h2>
           
           <div className="overflow-y-auto max-h-[60vh] p-4 bg-black border border-brand-yellow/10 rounded-md mb-6 text-brand-yellow/90">
             <h3 className="text-xl font-semibold mb-4 text-brand-yellow">Invitation letter</h3>
