@@ -1,0 +1,73 @@
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 0%; /* Black */
+    --foreground: 60 100% 50%; /* Yellow */
+
+    --card: 0 0% 7%; /* Dark black with yellow tint */
+    --card-foreground: 0 0% 98%;
+
+    --popover: 0 0% 3%;
+    --popover-foreground: 60 100% 50%;
+
+    --primary: 60 100% 50%; /* Yellow */
+    --primary-foreground: 0 0% 0%; /* Black */
+
+    --secondary: 60 100% 50%; /* Yellow */
+    --secondary-foreground: 0 0% 0%; /* Black */
+
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 70%;
+
+    --accent: 60 100% 50%; /* Yellow */
+    --accent-foreground: 0 0% 0%; /* Black */
+
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+
+    --border: 0 0% 20%;
+    --input: 0 0% 15%;
+    --ring: 60 100% 50%;
+
+    --radius: 0.5rem;
+
+    --sidebar-background: 0 0% 0%;
+    --sidebar-foreground: 60 100% 50%;
+    --sidebar-primary: 60 100% 50%;
+    --sidebar-primary-foreground: 0 0% 0%;
+    --sidebar-accent: 0 0% 15%;
+    --sidebar-accent-foreground: 60 100% 50%;
+    --sidebar-border: 0 0% 20%;
+    --sidebar-ring: 60 100% 50%;
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  .bg-gradient-primary {
+    background: linear-gradient(to right, #000000, #FFF200);
+  }
+  
+  .bg-gradient-secondary {
+    background: linear-gradient(to bottom, #000000, #FFF200);
+  }
+
+  .bg-gradient-card {
+    background: linear-gradient(135deg, #111111, #222222);
+  }
+
+  .bg-gradient-form {
+    background: linear-gradient(135deg, #0d0d0d, #1a1a0d);
+  }
+}
