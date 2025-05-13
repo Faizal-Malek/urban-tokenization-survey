@@ -7,13 +7,11 @@ import { Label } from "@/components/ui/label";
 
 const TermsAndConditions = () => {
   const [accepted, setAccepted] = useState(false);
-  const [participantSigned, setParticipantSigned] = useState(false);
-  const [dateSigned, setDateSigned] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   const handleAccept = () => {
-    if (accepted && participantSigned && dateSigned) {
+    if (accepted ) {
       localStorage.setItem("termsAccepted", "true");
       navigate("/");
       toast({
@@ -41,7 +39,7 @@ const TermsAndConditions = () => {
         <div className="max-w-4xl mx-auto bg-black/70 p-6 rounded-lg border border-brand-yellow/20 shadow-lg">
           <div className="flex justify-center mb-6">
             <img 
-              src="/lovable-uploads/e411e33e-dbda-4cec-bf68-b143fe60ec8f.png" 
+              src="/e411e33e-dbda-4cec-bf68-b143fe60ec8f.png" 
               alt="University of Johannesburg Emblem" 
               className="h-24 md:h-32"
             />
@@ -83,37 +81,6 @@ const TermsAndConditions = () => {
               Naeem Razak<br />
               Master's Candidate – University of Johannesburg
             </p>
-            
-            <div className="flex flex-col space-y-4 mb-6">
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="participant-signature" 
-                  checked={participantSigned} 
-                  onCheckedChange={(checked) => setParticipantSigned(checked === true)}
-                  className="border-brand-yellow data-[state=checked]:bg-brand-yellow data-[state=checked]:text-black"
-                />
-                <Label 
-                  htmlFor="participant-signature" 
-                  className="text-brand-yellow cursor-pointer"
-                >
-                  Participant's Signature
-                </Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox 
-                  id="date-signature" 
-                  checked={dateSigned} 
-                  onCheckedChange={(checked) => setDateSigned(checked === true)}
-                  className="border-brand-yellow data-[state=checked]:bg-brand-yellow data-[state=checked]:text-black"
-                />
-                <Label 
-                  htmlFor="date-signature" 
-                  className="text-brand-yellow cursor-pointer"
-                >
-                  Date: {new Date().toLocaleDateString()}
-                </Label>
-              </div>
-            </div>
             
             <p className="text-center mb-6">Thank you for taking the time to participate in this questionnaire.</p>
             
