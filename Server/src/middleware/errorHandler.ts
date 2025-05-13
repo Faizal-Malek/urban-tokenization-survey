@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 
-export class AppError extends Error {
+class AppError extends Error {
   statusCode: number;
   status: string;
   isOperational: boolean;
@@ -11,7 +11,8 @@ export class AppError extends Error {
     this.status = `${statusCode}`.startsWith('4') ? 'fail' : 'error';
     this.isOperational = true;
 
-    Error.captureStackTrace(this, this.constructor);
+    // Remove the captureStackTrace call as it's not needed with TypeScript
+    Object.setPrototypeOf(this, AppError.prototype);
   }
 }
 
@@ -34,4 +35,4 @@ export const errorHandler = (
     status: 'error',
     message: 'Something went wrong!',
   });
-}; 
+};
