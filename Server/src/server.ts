@@ -23,6 +23,10 @@ app.use(cors({
   origin: ["https://urban-tokenization-survey.vercel.app"],
   credentials: true,
 }));
+app.use(cors({
+  origin: ["https://urban-tokenization-survey.vercel.app"],
+  credentials: true,
+}));
 
 // Rate limiting
 const limiter = rateLimit({

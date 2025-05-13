@@ -50,7 +50,7 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    axios.get("http://146.141.45.34:5000/api/questionnaire/analytics", { withCredentials: true })
+    axios.get("https://urban-tokenization-survey.onrender.com/api/questionnaire/analytics", { withCredentials: true })
       .then(res => setDashboardData(res.data))
       .catch(err => {
         toast.error("Failed to load analytics");
