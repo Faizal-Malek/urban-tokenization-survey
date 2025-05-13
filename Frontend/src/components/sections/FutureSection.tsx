@@ -78,7 +78,7 @@ export function FutureSection() {
             value={factorsText}
             onChange={(e) => updateFormData("future", { factorsText: e.target.value })}
             placeholder="Please share your thoughts..."
-            className="min-h-28"
+            className="min-h-28 text-white bg-black placeholder:text-gray-400"
           />
         </div>
 
@@ -89,7 +89,7 @@ export function FutureSection() {
             value={futureVisionText}
             onChange={(e) => updateFormData("future", { futureVisionText: e.target.value })}
             placeholder="Please describe your vision..."
-            className="min-h-28"
+            className="min-h-28 text-white bg-black placeholder:text-gray-400"
           />
         </div>
 
