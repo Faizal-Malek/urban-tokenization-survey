@@ -20,7 +20,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
 app.use(cors({
-  origin: true,
+  origin: ["https://urban-tokenization-survey.vercel.app"],
   credentials: true,
 }));
 
@@ -51,4 +51,12 @@ mongoose.connect(process.env.MONGODB_URI!)
   })
   .catch((error) => {
     console.error('MongoDB connection error:', error);
-  }); 
+  });
+
+// Add this after all your route definitions
+app.use('*', (req, res) => {
+  res.status(404).json({
+    status: 'error',
+    message: 'Route not found'
+  });
+});
