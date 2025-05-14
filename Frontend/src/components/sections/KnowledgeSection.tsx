@@ -5,10 +5,34 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export function KnowledgeSection() {
   const { formData, updateFormData, setCurrentSection } = useQuestionnaire();
   const { blockchainFamiliarity, tokenizationFamiliarity, participatedProjects, projectDescription } = formData.knowledge;
+  const [showProjectDescription, setShowProjectDescription] = useState(participatedProjects === 'Yes');
+
+  const handleProjectParticipation = (value: string) => {
+    if (value === "Yes") {
+      setShowProjectDescription(true);
+    } else {
+      setShowProjectDescription(false);
+      // Clear project description when 'No' is selected
+      updateFormData("knowledge", { 
+        participatedProjects: value,
+        projectDescription: ''
+      });
+      return;
+    }
+    updateFormData("knowledge", { participatedProjects: value });
+  };
+
+  const handleProjectDescription = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    updateFormData("knowledge", { 
+      participatedProjects: "Yes",
+      projectDescription: e.target.value 
+    });
+  };
 
   const handleContinue = () => {
     if (!blockchainFamiliarity || !tokenizationFamiliarity || !participatedProjects) {
@@ -105,7 +129,7 @@ export function KnowledgeSection() {
           <h3 className="text-lg font-medium">Have you participated in any projects or initiatives using blockchain or tokenization?</h3>
           <RadioGroup 
             value={participatedProjects} 
-            onValueChange={(value) => updateFormData("knowledge", { participatedProjects: value })}
+            onValueChange={handleProjectParticipation}
           >
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="Yes" id="pp1" className="border-black text-black checked:bg-black checked:border-black" />
@@ -117,15 +141,15 @@ export function KnowledgeSection() {
             </div>
           </RadioGroup>
 
-          {participatedProjects === 'Yes' && (
+          {showProjectDescription && (
             <div className="mt-3">
               <Label htmlFor="project-description">Please briefly describe the project:</Label>
               <Textarea 
                 id="project-description" 
-                value={projectDescription}
-                onChange={(e) => updateFormData("knowledge", { projectDescription: e.target.value })}
+                value={projectDescription || ''}
+                onChange={handleProjectDescription}
                 placeholder="Please provide a brief description of the project..."
-                className="mt-2"
+                className="mt-2 text-white placeholder:text-gray-400"
               />
             </div>
           )}

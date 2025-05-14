@@ -5,10 +5,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
+import { useState } from "react";
 
 export function DemographicsSection() {
   const { formData, updateFormData, setCurrentSection } = useQuestionnaire();
   const { occupation, educationLevel, yearsOfExperience } = formData.demographics;
+  
+  const [showCustomOccupation, setShowCustomOccupation] = useState(occupation === 'Other');
+  const [showCustomEducation, setShowCustomEducation] = useState(educationLevel === 'Other');
 
   const handleContinue = () => {
     if (!occupation || !educationLevel || !yearsOfExperience) {
@@ -23,22 +27,36 @@ export function DemographicsSection() {
 
   const handleOccupationChange = (value: string) => {
     updateFormData("demographics", { occupation: value });
+    setShowCustomOccupation(value === 'Other');
+    if (value !== 'Other') {
+      updateFormData("demographics", { customOccupation: '' });
+    }
   };
 
   const handleEducationChange = (value: string) => {
     updateFormData("demographics", { educationLevel: value });
+    setShowCustomEducation(value === 'Other');
+    if (value !== 'Other') {
+      updateFormData("demographics", { customEducation: '' });
+    }
+  };
+
+  const handleCustomOccupationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateFormData("demographics", { 
+      occupation: 'Other',
+      customOccupation: e.target.value 
+    });
+  };
+
+  const handleCustomEducationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    updateFormData("demographics", { 
+      educationLevel: 'Other',
+      customEducation: e.target.value 
+    });
   };
 
   const handleExperienceChange = (value: string) => {
     updateFormData("demographics", { yearsOfExperience: value });
-  };
-
-  const handleCustomOccupationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateFormData("demographics", { occupation: e.target.value });
-  };
-
-  const handleCustomEducationChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateFormData("demographics", { educationLevel: e.target.value });
   };
 
   return (
@@ -79,21 +97,24 @@ export function DemographicsSection() {
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="Other" id="r6" />
-              <Label htmlFor="r6">Other</Label>
+              <Label htmlFor="r6">Other (please type below)</Label>
             </div>
-            {occupation === "Other" && (
-              <div className="ml-6 mt-2">
-                <Input 
-                  placeholder="Please specify" 
-                  className="max-w-xs"
-                  onChange={handleCustomOccupationChange}
-                />
-              </div>
-            )}
           </RadioGroup>
+          {occupation === "Other" && (
+            <div className="mt-2">
+              <Label htmlFor="customOccupation" className="text-sm text-gray-600">Please specify your occupation:</Label>
+              <Input 
+                id="customOccupation"
+                placeholder="Type your occupation here"
+                className="max-w-xs mt-1"
+                value={formData.demographics.customOccupation || ''}
+                onChange={handleCustomOccupationChange}
+              />
+            </div>
+          )}
         </div>
 
-        {/* Education Level */}
+        {/* Education Level - Similar update */}
         <div className="space-y-3">
           <h3 className="text-lg font-medium">Education Level</h3>
           <RadioGroup 
@@ -122,18 +143,21 @@ export function DemographicsSection() {
             </div>
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="Other" id="e6" />
-              <Label htmlFor="e6">Other</Label>
+              <Label htmlFor="e6">Other (please type below)</Label>
             </div>
-            {educationLevel === "Other" && (
-              <div className="ml-6 mt-2">
-                <Input 
-                  placeholder="Please specify" 
-                  className="max-w-xs"
-                  onChange={handleCustomEducationChange}
-                />
-              </div>
-            )}
           </RadioGroup>
+          {educationLevel === "Other" && (
+            <div className="mt-2">
+              <Label htmlFor="customEducation" className="text-sm text-gray-600">Please specify your education level:</Label>
+              <Input 
+                id="customEducation"
+                placeholder="Type your education level here"
+                className="max-w-xs mt-1"
+                value={formData.demographics.customEducation || ''}
+                onChange={handleCustomEducationChange}
+              />
+            </div>
+          )}
         </div>
 
         {/* Years of Experience */}

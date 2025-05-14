@@ -12,6 +12,7 @@ export function PolicySection() {
   const { formData, updateFormData, setCurrentSection } = useQuestionnaire();
   const { currentPoliciesPromote, challenges, governmentSupport } = formData.policy;
   const [otherChallenge, setOtherChallenge] = useState("");
+  const [showOtherChallenge, setShowOtherChallenge] = useState(false);
   
   const challengeOptions = [
     { id: "c1", value: "Lack of clear legal frameworks", label: "Lack of clear legal frameworks" },
@@ -22,7 +23,15 @@ export function PolicySection() {
   ];
 
   const handleChallengeChange = (checked: boolean, challenge: string) => {
-    if (checked) {
+    if (challenge === "Other") {
+      setShowOtherChallenge(checked);
+      if (!checked) {
+        setOtherChallenge("");
+        updateFormData("policy", { 
+          challenges: challenges.filter(c => c !== "Other" && !challengeOptions.map(o => o.value).includes(c))
+        });
+      }
+    } else if (checked) {
       updateFormData("policy", { challenges: [...challenges, challenge] });
     } else {
       updateFormData("policy", { challenges: challenges.filter(c => c !== challenge) });
@@ -31,7 +40,9 @@ export function PolicySection() {
 
   const handleAddOtherChallenge = () => {
     if (otherChallenge.trim() && !challenges.includes(otherChallenge)) {
-      updateFormData("policy", { challenges: [...challenges, otherChallenge] });
+      updateFormData("policy", { 
+        challenges: [...challenges.filter(c => !challengeOptions.map(o => o.value).includes(c)), "Other", otherChallenge] 
+      });
       setOtherChallenge("");
       toast.success("Custom challenge added!");
     } else {
@@ -103,14 +114,14 @@ export function PolicySection() {
               <div key={challenge.id} className="flex items-center space-x-2">
                 <Checkbox 
                   id={challenge.id} 
-                  checked={challenges.includes(challenge.value)}
+                  checked={challenge.value === "Other" ? showOtherChallenge : challenges.includes(challenge.value)}
                   onCheckedChange={(checked) => handleChallengeChange(checked as boolean, challenge.value)}
                 />
                 <Label htmlFor={challenge.id}>{challenge.label}</Label>
               </div>
             ))}
             
-            {challenges.includes("Other") && (
+            {showOtherChallenge && (
               <div className="flex items-center space-x-2 ml-6 mt-2">
                 <Input 
                   value={otherChallenge}

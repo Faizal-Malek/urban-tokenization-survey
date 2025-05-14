@@ -5,7 +5,9 @@ export type QuestionnaireSection = 'demographics' | 'knowledge' | 'policy' | 'to
 
 interface DemographicsData {
   occupation: string;
+  customOccupation?: string;
   educationLevel: string;
+  customEducation?: string;
   yearsOfExperience: string;
 }
 
@@ -109,13 +111,16 @@ export const QuestionnaireProvider = ({ children }: { children: ReactNode }) => 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const updateFormData = (section: QuestionnaireSection, data: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [section]: {
+    setFormData((prev) => {
+      const updatedSection = {
         ...prev[section],
         ...data
-      }
-    }));
+      };
+      return {
+        ...prev,
+        [section]: updatedSection
+      };
+    });
   };
 
   const submitForm = async () => {
