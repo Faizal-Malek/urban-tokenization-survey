@@ -1,6 +1,7 @@
 
-import { useState } from "react";
-import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import { toast } from "sonner";
 import { SubmissionHeader } from "@/components/admin/SubmissionHeader";
 import { SubmissionsTable } from "@/components/admin/SubmissionsTable";
 import { SubmissionPreviewModal } from "@/components/admin/SubmissionPreviewModal";
@@ -8,6 +9,8 @@ import { useSubmissionData } from "@/hooks/useSubmissionData";
 
 const AdminSubmissions = () => {
   const [authenticated, setAuthenticated] = useState(false);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const { 
     filteredSubmissions, 
@@ -19,9 +22,24 @@ const AdminSubmissions = () => {
     error
   } = useSubmissionData();
 
-  // Handle login
-  const handleLogin = () => {
-    setAuthenticated(true);
+  // Handle login with database authentication
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(
+        "https://urban-tokenization-survey.onrender.com/api/auth/login",
+        { username, password },
+        { 
+          withCredentials: true,
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      setAuthenticated(true);
+    } catch (err) {
+      toast.error("Login failed");
+    }
   };
 
   // Preview a submission
@@ -35,7 +53,56 @@ const AdminSubmissions = () => {
   };
 
   if (!authenticated) {
-    return <AdminLoginForm onLogin={handleLogin} />;
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-black to-[#FFF200] flex flex-col">
+        {/* Modern Fixed Navigation Bar (no icon) */}
+        <nav className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-5xl bg-[#fffbe6]/90 rounded-xl shadow flex items-center justify-between px-8 py-4 border border-yellow-100">
+          <span className="font-bold text-xl text-gray-900">Urban Infrastructure Tokenization Survey</span>
+          <a href="/" className="bg-white px-5 py-2 rounded-md shadow text-black font-semibold hover:bg-gray-100 transition">
+            Back to Main
+          </a>
+        </nav>
+        {/* Centered Login Card */}
+        <main className="flex-1 flex items-center justify-center mt-28">
+          <div className="bg-white/95 rounded-xl shadow-lg p-8 w-full max-w-md">
+            <h2 className="text-2xl font-bold text-gray-900 mb-2">Admin Submissions Login</h2>
+            <p className="text-gray-600 mb-6">Enter your credentials to access submission data</p>
+            <form onSubmit={handleLogin}>
+              <label className="block text-gray-800 font-medium mb-1" htmlFor="username">
+                Username
+              </label>
+              <input
+                id="username"
+                type="text"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                required
+                className="w-full mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                placeholder="Enter your username"
+              />
+              <label className="block text-gray-800 font-medium mb-1" htmlFor="password">
+                Password
+              </label>
+              <input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="w-full mb-6 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                placeholder="Enter your password"
+              />
+              <button
+                type="submit"
+                className="w-full bg-yellow-300 hover:bg-yellow-400 text-black font-bold py-2 rounded transition"
+              >
+                Login
+              </button>
+            </form>
+          </div>
+        </main>
+      </div>
+    );
   }
 
   return (
