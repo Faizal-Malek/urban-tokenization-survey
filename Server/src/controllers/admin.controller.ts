@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { User } from '../models/user.model';
 import { AppError } from '../middleware/errorHandler';
+import { Questionnaire } from '../models/questionnaire.model';
 
 export const getAllUsers = async (
   req: Request,
@@ -88,4 +89,21 @@ export const deleteUser = async (
   } catch (error) {
     next(error);
   }
-}; 
+};
+
+export const getAllQuestionnaires = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  try {
+    const submissions = await Questionnaire.find().sort({ submittedAt: -1 });
+    res.status(200).json({
+      status: 'success',
+      results: submissions.length,
+      submissions,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

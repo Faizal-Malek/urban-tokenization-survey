@@ -19,10 +19,13 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
+// Instead of two CORS configurations, use just one:
 app.use(cors({
   origin: [
     'https://urban-tokenization-survey.vercel.app',
-    'https://urban-tokenization-survey-git-main-faizals-projects-bee3353c.vercel.app'
+    'https://urban-tokenization-survey-git-main-faizals-projects-bee3353c.vercel.app',
+    // Add localhost for development if needed
+    'http://localhost:3000'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],

@@ -5,6 +5,7 @@ import {
   getUser,
   updateUser,
   deleteUser,
+  getAllQuestionnaires
 } from '../controllers/admin.controller';
 
 const router = express.Router();
@@ -15,5 +16,6 @@ router.use(restrictTo('admin'));
 
 router.route('/users').get(getAllUsers);
 router.route('/users/:id').get(getUser).patch(updateUser).delete(deleteUser);
+router.route('/questionnaires').get(getAllQuestionnaires);
 
-export default router; 
+export default router;
