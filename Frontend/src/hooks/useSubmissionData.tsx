@@ -23,6 +23,7 @@ export const useSubmissionData = () => {
   const { toast } = useToast();
 
   // Fetch submissions from the API
+  // In the useEffect where you fetch submissions
   useEffect(() => {
     const fetchSubmissions = async () => {
       try {
@@ -77,7 +78,7 @@ export const useSubmissionData = () => {
         setLoading(false);
       }
     };
-
+  
     fetchSubmissions();
   }, [toast]);
 
