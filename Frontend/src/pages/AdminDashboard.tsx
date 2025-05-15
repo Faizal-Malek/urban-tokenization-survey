@@ -69,9 +69,6 @@ const AdminDashboard = () => {
         <nav className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-5xl bg-[#fffbe6]/90 rounded-xl shadow flex items-center justify-between px-8 py-4 border border-yellow-100">
           <span className="font-bold text-xl text-gray-900">Urban Infrastructure Tokenization Survey</span>
           <div className="flex items-center gap-3">
-            <a href="/admin/submissions" className="bg-white px-5 py-2 rounded-md shadow text-black font-semibold hover:bg-gray-100 transition">
-              View Submissions
-            </a>
             <a href="/" className="bg-white px-5 py-2 rounded-md shadow text-black font-semibold hover:bg-gray-100 transition">
               Back to Main
             </a>
