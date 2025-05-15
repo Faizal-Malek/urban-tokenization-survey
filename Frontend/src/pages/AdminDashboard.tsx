@@ -70,11 +70,93 @@ const AdminDashboard = () => {
     return <div className="min-h-screen flex items-center justify-center">Loading analytics...</div>;
   }
 
-  // Rest of your component remains the same, but replace the navigation bar with:
   return (
-    <div className="bg-gradient-to-br from-black via-black to-[#FFF200] min-h-screen">
+    <div className="bg-gradient-to-br from-black via-black to-[#FFF200] min-h-screen pb-16">
       <AdminNavBar currentPage="dashboard" />
-      {/* Rest of your dashboard UI */}
+      
+      <div className="container mx-auto pt-24 px-4">
+        <h1 className="text-3xl font-bold text-white mb-8">Survey Analytics Dashboard</h1>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Demographics Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Demographics</CardTitle>
+              <CardDescription>Breakdown of respondent demographics</CardDescription>
+            </CardHeader>
+            <CardContent className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={dashboardData?.demographics || []}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={true}
+                    label={({name, percent}) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    {dashboardData?.demographics?.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+          
+          {/* Knowledge Level Card */}
+          <Card>
+            <CardHeader>
+              <CardTitle>Knowledge Levels</CardTitle>
+              <CardDescription>Blockchain & tokenization familiarity</CardDescription>
+            </CardHeader>
+            <CardContent className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={dashboardData?.knowledge || []}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="value" fill="#8884d8" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+        
+        {/* Additional charts can be added here */}
+        <div className="grid grid-cols-1 gap-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>Adoption Likelihood</CardTitle>
+              <CardDescription>Likelihood of adopting tokenization solutions</CardDescription>
+            </CardHeader>
+            <CardContent className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={dashboardData?.adoption || []}
+                  margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="name" />
+                  <YAxis />
+                  <Tooltip />
+                  <Legend />
+                  <Bar dataKey="value" fill="#82ca9d" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </div>
+      </div>
     </div>
   );
 };
