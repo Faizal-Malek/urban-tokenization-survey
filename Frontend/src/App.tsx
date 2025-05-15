@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import { QuestionnaireProvider } from "./context/QuestionnaireContext";
 import QuestionnaireHome from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
+import AdminSubmissions from "./pages/AdminSubmissions";
 import TermsAndConditions from "./pages/TermsAndConditions";
 
 const queryClient = new QueryClient();
@@ -41,6 +42,7 @@ const App = () => (
               }
             />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/submissions" element={<AdminSubmissions />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
