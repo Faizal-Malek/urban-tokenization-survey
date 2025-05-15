@@ -36,9 +36,17 @@ const AdminSubmissions = () => {
           }
         }
       );
+      
+      // Store the token in localStorage as a backup
+      if (res.data && res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+      
       setAuthenticated(true);
+      toast.success("Login successful");
     } catch (err) {
-      toast.error("Login failed");
+      console.error("Login error:", err);
+      toast.error("Login failed: " + (err.response?.data?.message || "Invalid credentials"));
     }
   };
 

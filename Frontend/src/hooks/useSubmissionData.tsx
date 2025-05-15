@@ -27,17 +27,23 @@ export const useSubmissionData = () => {
     const fetchSubmissions = async () => {
       try {
         setLoading(true);
+        
+        // Get token from localStorage as a backup if cookie doesn't work
+        const token = localStorage.getItem('token');
+        
         const response = await fetch('https://urban-tokenization-survey.onrender.com/api/admin/questionnaires', {
-          credentials: 'include',
+          credentials: 'include',  // This is important for cookies
           headers: {
-            'Content-Type': 'application/json'
+            'Content-Type': 'application/json',
+            // Include token in Authorization header as a backup
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {})
           }
         });
         
         if (!response.ok) {
           const errorText = await response.text();
           console.error('API Error Response:', errorText);
-          throw new Error(`Error: ${response.status} - ${response.statusText}`);
+          throw new Error(`Error: ${response.status}`);
         }
         
         const data = await response.json();
@@ -48,13 +54,13 @@ export const useSubmissionData = () => {
           return {
             id: item._id || `S${String(index + 1).padStart(3, '0')}`,
             date: item.submittedAt ? new Date(item.submittedAt).toISOString().split('T')[0] : 'Unknown',
-            occupation: responses.demographics?.occupation || 'Not specified',
-            educationLevel: responses.demographics?.educationLevel || 'Not specified',
-            yearsOfExperience: responses.demographics?.yearsOfExperience || 'Not specified',
-            blockchainFamiliarity: responses.knowledge?.blockchainFamiliarity || 'Not specified',
-            participatedProjects: responses.knowledge?.participatedProjects || 'No',
-            adoptionLikelihood: responses.future?.adoptionLikelihood || 'Not specified',
-            stakeholderViews: responses.tokenization?.stakeholderViews || 'Not specified',
+            occupation: responses.occupation || 'Not specified',
+            educationLevel: responses.educationLevel || 'Not specified',
+            yearsOfExperience: responses.yearsOfExperience || 'Not specified',
+            blockchainFamiliarity: responses.blockchainFamiliarity || 'Not specified',
+            participatedProjects: responses.participatedProjects || 'No',
+            adoptionLikelihood: responses.adoptionLikelihood || 'Not specified',
+            stakeholderViews: responses.stakeholderViews || 'Not specified',
           };
         });
         
