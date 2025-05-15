@@ -24,7 +24,7 @@ export const AdminNavBar = ({ currentPage }: AdminNavBarProps) => {
           href="/admin" 
           className={`px-4 py-2 rounded-md shadow font-semibold transition ${currentPage === 'dashboard' ? 'bg-yellow-400 text-black' : 'bg-white text-black hover:bg-gray-100'}`}
         >
-          Questionnaire
+          Dashboard
         </a>
         <button 
           onClick={logoutAdmin} 

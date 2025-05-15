@@ -51,9 +51,9 @@ const AdminSubmissions = () => {
         <div className="bg-white rounded-xl shadow-lg p-6 mb-8">
           <SubmissionHeader 
             filterText={filterText} 
-            setFilterText={setFilterText} 
-            handlePrint={handlePrint} 
-            handleDownload={handleDownload} 
+            onFilterChange={setFilterText}
+            onPrint={handlePrint}
+            onDownload={handleDownload}
           />
           
           {loading ? (
