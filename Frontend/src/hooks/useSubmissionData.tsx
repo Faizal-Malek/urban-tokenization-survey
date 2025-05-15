@@ -27,32 +27,40 @@ export const useSubmissionData = () => {
     const fetchSubmissions = async () => {
       try {
         setLoading(true);
-        const response = await fetch('/api/admin/questionnaires');
+        const response = await fetch('https://urban-tokenization-survey.onrender.com/api/admin/questionnaires', {
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        });
         
         if (!response.ok) {
-          throw new Error(`Error: ${response.status}`);
+          const errorText = await response.text();
+          console.error('API Error Response:', errorText);
+          throw new Error(`Error: ${response.status} - ${response.statusText}`);
         }
         
         const data = await response.json();
         
         // Transform the data to match our Submission type
         const formattedSubmissions = data.submissions.map((item: any, index: number) => {
-          const responses = item.responses;
+          const responses = item.responses || {};
           return {
             id: item._id || `S${String(index + 1).padStart(3, '0')}`,
-            date: new Date(item.submittedAt).toISOString().split('T')[0],
-            occupation: responses.occupation || 'Not specified',
-            educationLevel: responses.educationLevel || 'Not specified',
-            yearsOfExperience: responses.yearsOfExperience || 'Not specified',
-            blockchainFamiliarity: responses.blockchainFamiliarity || 'Not specified',
-            participatedProjects: responses.participatedProjects || 'No',
-            adoptionLikelihood: responses.adoptionLikelihood || 'Not specified',
-            stakeholderViews: responses.stakeholderViews || 'Not specified',
+            date: item.submittedAt ? new Date(item.submittedAt).toISOString().split('T')[0] : 'Unknown',
+            occupation: responses.demographics?.occupation || 'Not specified',
+            educationLevel: responses.demographics?.educationLevel || 'Not specified',
+            yearsOfExperience: responses.demographics?.yearsOfExperience || 'Not specified',
+            blockchainFamiliarity: responses.knowledge?.blockchainFamiliarity || 'Not specified',
+            participatedProjects: responses.knowledge?.participatedProjects || 'No',
+            adoptionLikelihood: responses.future?.adoptionLikelihood || 'Not specified',
+            stakeholderViews: responses.tokenization?.stakeholderViews || 'Not specified',
           };
         });
         
         setSubmissions(formattedSubmissions);
       } catch (err) {
+        console.error('Fetch error:', err);
         setError(err instanceof Error ? err.message : 'An unknown error occurred');
         toast({
           title: "Error fetching submissions",
