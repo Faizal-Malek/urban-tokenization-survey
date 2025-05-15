@@ -183,11 +183,26 @@ const AdminDashboard = () => {
   return (
     <div className="bg-gradient-to-br from-black via-black to-[#FFF200] min-h-screen">
       {/* Modern Fixed Navigation Bar (no icon) */}
-      <nav className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-5xl bg-[#fffbe6]/90 rounded-xl shadow flex items-center justify-between px-8 py-4 border border-yellow-100">
-        <span className="font-bold text-xl text-gray-900">Urban Infrastructure Tokenization Survey</span>
-        <a href="/" className="bg-white px-5 py-2 rounded-md shadow text-black font-semibold hover:bg-gray-100 transition">
-          Back to Main
-        </a>
+      <nav className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-5xl bg-black text-white rounded-xl shadow flex items-center justify-between px-8 py-4">
+        <div className="flex items-center">
+          <span className="font-bold text-xl">Admin Dashboard</span>
+        </div>
+        <div className="flex items-center gap-4">
+          <span className="mr-4">Welcome, Admin</span>
+          <a href="/admin/submissions" className="bg-white px-4 py-2 rounded-md shadow text-black font-semibold hover:bg-gray-100 transition">
+            Submissions Data
+          </a>
+          <button onClick={() => window.location.href = "/admin"} className="bg-white px-4 py-2 rounded-md shadow text-black font-semibold hover:bg-gray-100 transition">
+            Questionnaire
+          </button>
+          <button onClick={() => {
+            document.cookie = "jwt=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            localStorage.removeItem('token');
+            window.location.href = "/";
+          }} className="bg-transparent border border-white px-4 py-2 rounded-md text-white font-semibold hover:bg-white/10 transition">
+            Logout
+          </button>
+        </div>
       </nav>
       <main className="container mx-auto p-4 lg:p-8 mt-28">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
