@@ -48,7 +48,10 @@ const AdminDashboard = () => {
           ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         }
       })
-        .then(res => setDashboardData(res.data))
+        .then(res => {
+          console.log("Analytics data structure:", JSON.stringify(res.data, null, 2));
+          setDashboardData(res.data);
+        })
         .catch(err => {
           console.error("Analytics error:", err);
           toast.error("Failed to load analytics: " + (err.response?.data?.message || "Unknown error"));
@@ -70,10 +73,36 @@ const AdminDashboard = () => {
     return <div className="min-h-screen flex items-center justify-center">Loading analytics...</div>;
   }
 
-  // Extract summary metrics if available
-  const totalResponses = dashboardData?.totalResponses || dashboardData?.demographics?.reduce((sum, item) => sum + item.value, 0) || 0;
-  const completionRate = dashboardData?.completionRate || 0;
+  // Improved summary metrics extraction with fallbacks
+  const totalResponses = dashboardData?.totalResponses || 
+    (dashboardData?.demographics?.reduce((sum, item) => sum + (item.value || 0), 0) || 0);
+  
+  // Improved completion rate calculation with fallback
+  const completedResponses = dashboardData?.completedResponses || 0;
+  const completionRate = dashboardData?.completionRate || 
+    (totalResponses > 0 ? Math.round((completedResponses / totalResponses) * 100) : 0);
+    
+  // Add the getChartData function here
+  const getChartData = (dataKey, fallback = []) => {
+    if (dashboardData && dashboardData[dataKey] && Array.isArray(dashboardData[dataKey])) {
+      return dashboardData[dataKey];
+    }
+    if (dashboardData && dashboardData[dataKey] && typeof dashboardData[dataKey] === 'object') {
+      return Object.entries(dashboardData[dataKey]).map(([name, value]) => ({ name, value: typeof value === 'number' ? value : 0 }));
+    }
+    return fallback;
+  };
 
+  // Define all data variables here
+  const demographicsData = getChartData('demographics');
+  const educationData = getChartData('education');
+  const experienceData = getChartData('experience');
+  const adoptionData = getChartData('adoption');
+  const knowledgeData = getChartData('knowledge');
+  const benefitAreasData = getChartData('benefitAreas');
+  const stakeholderViewsData = getChartData('stakeholderViews');
+  const governanceModelsData = getChartData('governanceModels');
+  
   return (
     <div className="bg-gradient-to-br from-black via-black to-[#FFF200] min-h-screen pb-16">
       <AdminNavBar currentPage="dashboard" />
