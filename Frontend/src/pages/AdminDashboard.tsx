@@ -111,13 +111,12 @@ const AdminDashboard = () => {
         <h1 className="text-3xl font-bold text-white mb-8">Survey Analytics Dashboard</h1>
         
         {/* Summary Cards */}
-        // Update the summary cards to match the image styling
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="bg-white">
-            <CardHeader className="pb-2">
+            <CardHeader className="pb-2 text-black">
               <CardTitle className="text-sm font-medium">Total Responses</CardTitle>
             </CardHeader>
-            <CardContent>
+            <CardContent className="text-black">
               <div className="text-3xl font-bold">{totalResponses}</div>
               <p className="text-xs text-muted-foreground">+12% from last month</p>
             </CardContent>
@@ -154,8 +153,7 @@ const AdminDashboard = () => {
           </TabsList>
           
           <TabsContent value="demographics" className="space-y-8">
-            // For the Respondent Occupation chart
-            <Card>
+            <Card className="bg-white text-black">
               <CardHeader>
                 <CardTitle>Respondent Occupation</CardTitle>
               </CardHeader>
@@ -176,7 +174,7 @@ const AdminDashboard = () => {
             </Card>
             
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              <Card>
+              <Card className="bg-white text-black">
                 <CardHeader>
                   <CardTitle>Education Level</CardTitle>
                 </CardHeader>
