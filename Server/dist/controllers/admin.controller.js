@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.getUser = exports.getAllUsers = void 0;
+exports.getAllQuestionnaires = exports.deleteUser = exports.updateUser = exports.getUser = exports.getAllUsers = void 0;
 const user_model_1 = require("../models/user.model");
 const errorHandler_1 = require("../middleware/errorHandler");
+const questionnaire_model_1 = require("../models/questionnaire.model");
 const getAllUsers = async (req, res, next) => {
     try {
         const users = await user_model_1.User.find();
@@ -74,3 +75,17 @@ const deleteUser = async (req, res, next) => {
     }
 };
 exports.deleteUser = deleteUser;
+const getAllQuestionnaires = async (req, res, next) => {
+    try {
+        const submissions = await questionnaire_model_1.Questionnaire.find().sort({ submittedAt: -1 });
+        res.status(200).json({
+            status: 'success',
+            results: submissions.length,
+            submissions,
+        });
+    }
+    catch (error) {
+        next(error);
+    }
+};
+exports.getAllQuestionnaires = getAllQuestionnaires;

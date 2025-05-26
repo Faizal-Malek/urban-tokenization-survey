@@ -12,4 +12,5 @@ router.use(auth_middleware_1.protect);
 router.use((0, auth_middleware_1.restrictTo)('admin'));
 router.route('/users').get(admin_controller_1.getAllUsers);
 router.route('/users/:id').get(admin_controller_1.getUser).patch(admin_controller_1.updateUser).delete(admin_controller_1.deleteUser);
+router.route('/questionnaires').get(admin_controller_1.getAllQuestionnaires);
 exports.default = router;

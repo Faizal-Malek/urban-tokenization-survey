@@ -8,6 +8,7 @@ import NotFound from "./pages/NotFound";
 import { QuestionnaireProvider } from "./context/QuestionnaireContext";
 import QuestionnaireHome from "./pages/Index";
 import AdminDashboard from "./pages/AdminDashboard";
+import EnhancedAdminDashboard from "./pages/EnhancedAdminDashboard";
 import AdminSubmissions from "./pages/AdminSubmissions";
 import TermsAndConditions from "./pages/TermsAndConditions";
 
@@ -41,7 +42,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin" element={<EnhancedAdminDashboard />} />
+            <Route path="/admin/legacy" element={<AdminDashboard />} />
             <Route path="/admin/submissions" element={<AdminSubmissions />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

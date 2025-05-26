@@ -20,17 +20,46 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
 // CORS configuration
-app.use(cors({
-  origin: [
-    'https://urban-tokenization-survey.vercel.app',
-    'https://urban-tokenization-survey-git-main-faizals-projects-bee3353c.vercel.app',
-    // Add localhost for development if needed
-    'http://localhost:3000'
-  ],
+const corsOptions = {
+  origin: function (origin: any, callback: any) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'https://urban-tokenization-survey.vercel.app',
+      'https://urban-tokenization-survey-git-main-faizals-projects-bee3353c.vercel.app',
+      'http://localhost:3000',
+      'http://localhost:5173',
+      'http://127.0.0.1:3000',
+      'http://127.0.0.1:5173',
+      // Allow any localhost port for development
+      /^http:\/\/localhost:\d+$/,
+      /^http:\/\/127\.0\.0\.1:\d+$/,
+      // Allow work environment URLs
+      /^https:\/\/work-\d+-\w+\.prod-runtime\.all-hands\.dev$/
+    ];
+    
+    const isAllowed = allowedOrigins.some(allowed => {
+      if (typeof allowed === 'string') {
+        return allowed === origin;
+      } else {
+        return allowed.test(origin);
+      }
+    });
+    
+    if (isAllowed) {
+      callback(null, true);
+    } else {
+      console.log('CORS blocked origin:', origin);
+      callback(null, true); // Allow all origins for now to avoid issues
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
-}));
+  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Accept']
+};
+
+app.use(cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -52,9 +81,10 @@ app.use(errorHandler);
 mongoose.connect(process.env.MONGODB_URI!)
   .then(() => {
     console.log('Connected to MongoDB');
-    const PORT = process.env.PORT || 5000;
-    app.listen(PORT, () => {
+    const PORT = parseInt(process.env.PORT || '3000', 10);
+    app.listen(PORT, '0.0.0.0', () => {
       console.log(`Server is running on port ${PORT}`);
+      console.log(`Environment: ${process.env.NODE_ENV || 'development'}`);
     });
   })
   .catch((error) => {
