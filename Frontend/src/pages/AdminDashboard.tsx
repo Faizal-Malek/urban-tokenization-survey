@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { checkAuthStatus, verifyAuthStatus } from "@/utils/auth";
 import { AdminNavBar } from "@/components/admin/AdminNavBar";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
 import { 
   BarChart, 
   Bar, 
@@ -27,23 +28,59 @@ import {
   LineChart,
   Line,
   Area,
-  AreaChart
+  AreaChart,
+  RadialBarChart,
+  RadialBar
 } from "recharts";
 import axios from "axios";
 import { toast } from "sonner";
-import { RefreshCw, Download, TrendingUp, Users, CheckCircle, Clock } from "lucide-react";
+import { 
+  RefreshCw, 
+  Download, 
+  TrendingUp, 
+  Users, 
+  CheckCircle, 
+  Clock, 
+  BarChart3,
+  PieChart as PieChartIcon,
+  Activity,
+  AlertCircle,
+  FileText,
+  Calendar
+} from "lucide-react";
 
-// Chart colors
-const COLORS = ['#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c', '#d0ed57'];
+// Enhanced chart color schemes
+const COLORS = ['#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c', '#d0ed57', '#ffc658', '#ff7c7c'];
+const GRADIENT_COLORS = ['#667eea', '#764ba2', '#f093fb', '#f5576c', '#4facfe', '#00f2fe'];
+const PROFESSIONAL_COLORS = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f'];
+
+// Custom tooltip component for better data display
+const CustomTooltip = ({ active, payload, label }: any) => {
+  if (active && payload && payload.length) {
+    return (
+      <div className="bg-white p-3 border border-gray-200 rounded-lg shadow-lg">
+        <p className="font-semibold text-gray-800">{`${label}`}</p>
+        {payload.map((entry: any, index: number) => (
+          <p key={index} className="text-sm" style={{ color: entry.color }}>
+            {`${entry.name}: ${entry.value} ${entry.name === 'Percentage' ? '%' : 'responses'}`}
+          </p>
+        ))}
+      </div>
+    );
+  }
+  return null;
+};
 
 const AdminDashboard = () => {
-  const [authenticated, setAuthenticated] = useState(checkAuthStatus());
+  const [authenticated, setAuthenticated] = useState(false);
   const [authLoading, setAuthLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+  const [autoRefresh, setAutoRefresh] = useState(false);
 
-  const fetchAnalytics = async () => {
+  const fetchAnalytics = useCallback(async () => {
     if (!authenticated) return;
     
     setLoading(true);
@@ -55,88 +92,210 @@ const AdminDashboard = () => {
       const response = await axios.get("https://urban-tokenization-survey.onrender.com/api/questionnaire/analytics", { 
         withCredentials: true,
         headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
-        }
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+          'Cache-Control': 'no-cache'
+        },
+        timeout: 30000 // 30 second timeout
       });
       
       console.log("Analytics data structure:", JSON.stringify(response.data, null, 2));
-      setDashboardData(response.data);
+      
+      // Enhanced data validation and processing
+      const processedData = {
+        ...response.data,
+        // Ensure all chart data arrays exist and have proper structure
+        demographics: Array.isArray(response.data.demographics) ? response.data.demographics : [],
+        education: Array.isArray(response.data.education) ? response.data.education : [],
+        experience: Array.isArray(response.data.experience) ? response.data.experience : [],
+        adoption: Array.isArray(response.data.adoption) ? response.data.adoption : [],
+        knowledge: Array.isArray(response.data.knowledge) ? response.data.knowledge : [],
+        benefitAreas: Array.isArray(response.data.benefitAreas) ? response.data.benefitAreas : [],
+        stakeholderViews: Array.isArray(response.data.stakeholderViews) ? response.data.stakeholderViews : [],
+        governanceModels: Array.isArray(response.data.governanceModels) ? response.data.governanceModels : [],
+        // Add percentage calculations for better insights
+        totalResponses: response.data.totalResponses || 0,
+        completedResponses: response.data.completedResponses || 0,
+        completionRate: response.data.completionRate || 0,
+        avgCompletionTime: response.data.avgCompletionTime || "N/A"
+      };
+      
+      setDashboardData(processedData);
+      setLastRefresh(new Date());
       toast.success("Analytics data refreshed successfully");
     } catch (err: any) {
       console.error("Analytics error:", err);
-      const errorMessage = err.response?.data?.message || err.message || "Unknown error";
+      
+      // Enhanced error handling
+      if (err.response?.status === 401) {
+        // Token expired or invalid
+        localStorage.removeItem('adminAuth');
+        localStorage.removeItem('token');
+        setAuthenticated(false);
+        toast.error("Session expired. Please login again.");
+        return;
+      }
+      
+      const errorMessage = err.response?.data?.message || err.message || "Failed to load analytics data";
       setError(errorMessage);
       toast.error("Failed to load analytics: " + errorMessage);
     } finally {
       setLoading(false);
     }
-  };
+  }, [authenticated]);
 
+  // Enhanced authentication verification with session persistence
   useEffect(() => {
     const verifyAuth = async () => {
       setAuthLoading(true);
-      const isAuthenticated = checkAuthStatus();
       
-      if (isAuthenticated) {
-        // Verify with server
-        const serverAuth = await verifyAuthStatus();
-        setAuthenticated(serverAuth);
-        if (serverAuth) {
-          fetchAnalytics();
+      try {
+        const isAuthenticated = checkAuthStatus();
+        
+        if (isAuthenticated) {
+          // Verify with server to ensure session is still valid
+          const serverAuth = await verifyAuthStatus();
+          setAuthenticated(serverAuth);
+          
+          if (serverAuth) {
+            await fetchAnalytics();
+          } else {
+            // Clear invalid session data
+            localStorage.removeItem('adminAuth');
+            localStorage.removeItem('token');
+            localStorage.removeItem('adminUsername');
+            toast.error("Session expired. Please login again.");
+          }
+        } else {
+          setAuthenticated(false);
         }
-      } else {
+      } catch (error) {
+        console.error("Auth verification error:", error);
         setAuthenticated(false);
+      } finally {
+        setAuthLoading(false);
       }
-      
-      setAuthLoading(false);
     };
     
     verifyAuth();
-  }, []);
+  }, [fetchAnalytics]);
 
+  // Auto-refresh functionality
   useEffect(() => {
-    if (authenticated && !authLoading) {
-      fetchAnalytics();
+    let interval: NodeJS.Timeout;
+    
+    if (autoRefresh && authenticated && !authLoading) {
+      interval = setInterval(() => {
+        fetchAnalytics();
+      }, 300000); // Refresh every 5 minutes
     }
-  }, [authenticated, authLoading]);
+    
+    return () => {
+      if (interval) {
+        clearInterval(interval);
+      }
+    };
+  }, [autoRefresh, authenticated, authLoading, fetchAnalytics]);
 
-  const exportAnalytics = () => {
+  // Session heartbeat to maintain authentication
+  useEffect(() => {
+    let heartbeat: NodeJS.Timeout;
+    
+    if (authenticated) {
+      heartbeat = setInterval(async () => {
+        const isValid = await verifyAuthStatus();
+        if (!isValid) {
+          setAuthenticated(false);
+          localStorage.removeItem('adminAuth');
+          localStorage.removeItem('token');
+          toast.error("Session expired. Please login again.");
+        }
+      }, 600000); // Check every 10 minutes
+    }
+    
+    return () => {
+      if (heartbeat) {
+        clearInterval(heartbeat);
+      }
+    };
+  }, [authenticated]);
+
+  const exportAnalytics = (format: 'json' | 'csv' = 'json') => {
     if (!dashboardData) {
       toast.error("No data to export");
       return;
     }
 
-    const exportData = {
-      summary: {
-        totalResponses: dashboardData.totalResponses,
-        completedResponses: dashboardData.completedResponses,
-        completionRate: dashboardData.completionRate,
-        avgCompletionTime: dashboardData.avgCompletionTime
-      },
-      analytics: {
-        demographics: dashboardData.demographics,
-        education: dashboardData.education,
-        experience: dashboardData.experience,
-        adoption: dashboardData.adoption,
-        knowledge: dashboardData.knowledge,
-        benefitAreas: dashboardData.benefitAreas,
-        stakeholderViews: dashboardData.stakeholderViews,
-        governanceModels: dashboardData.governanceModels
-      },
-      exportedAt: new Date().toISOString()
-    };
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `analytics-export-${new Date().toISOString().split('T')[0]}.json`;
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(url);
+    const timestamp = new Date().toISOString().split('T')[0];
     
-    toast.success("Analytics data exported successfully");
+    if (format === 'json') {
+      const exportData = {
+        summary: {
+          totalResponses: dashboardData.totalResponses,
+          completedResponses: dashboardData.completedResponses,
+          completionRate: dashboardData.completionRate,
+          avgCompletionTime: dashboardData.avgCompletionTime,
+          lastRefresh: lastRefresh.toISOString()
+        },
+        analytics: {
+          demographics: dashboardData.demographics,
+          education: dashboardData.education,
+          experience: dashboardData.experience,
+          adoption: dashboardData.adoption,
+          knowledge: dashboardData.knowledge,
+          benefitAreas: dashboardData.benefitAreas,
+          stakeholderViews: dashboardData.stakeholderViews,
+          governanceModels: dashboardData.governanceModels
+        },
+        metadata: {
+          exportedAt: new Date().toISOString(),
+          exportFormat: 'json',
+          dataVersion: '2.0'
+        }
+      };
+
+      const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `analytics-export-${timestamp}.json`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } else if (format === 'csv') {
+      // Create CSV data
+      let csvContent = "Category,Item,Value,Percentage\n";
+      
+      // Add summary data
+      csvContent += `Summary,Total Responses,${dashboardData.totalResponses},\n`;
+      csvContent += `Summary,Completed Responses,${dashboardData.completedResponses},\n`;
+      csvContent += `Summary,Completion Rate,${dashboardData.completionRate},${dashboardData.completionRate}%\n`;
+      
+      // Add analytics data
+      const categories = ['demographics', 'education', 'experience', 'adoption', 'knowledge', 'benefitAreas', 'stakeholderViews', 'governanceModels'];
+      
+      categories.forEach(category => {
+        const data = dashboardData[category] || [];
+        const total = data.reduce((sum: number, item: any) => sum + (item.value || 0), 0);
+        
+        data.forEach((item: any) => {
+          const percentage = total > 0 ? ((item.value / total) * 100).toFixed(1) : '0';
+          csvContent += `${category},${item.name},${item.value},${percentage}%\n`;
+        });
+      });
+      
+      const blob = new Blob([csvContent], { type: 'text/csv' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `analytics-export-${timestamp}.csv`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    }
+    
+    toast.success(`Analytics data exported successfully as ${format.toUpperCase()}`);
   };
 
   if (authLoading) {
@@ -223,12 +382,38 @@ const AdminDashboard = () => {
       <AdminNavBar currentPage="dashboard" />
       
       <div className="container mx-auto pt-24 px-4">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-white mb-2">Survey Analytics Dashboard</h1>
-            <p className="text-white/70">Real-time insights from urban tokenization survey responses</p>
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
+          <div className="flex-1">
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold text-white">Survey Analytics Dashboard</h1>
+              <Badge variant="secondary" className="bg-green-500 text-white">
+                <Activity className="h-3 w-3 mr-1" />
+                Live
+              </Badge>
+            </div>
+            <p className="text-white/70 mb-3">Real-time insights from urban tokenization survey responses</p>
+            <div className="flex items-center gap-4 text-sm text-white/60">
+              <div className="flex items-center gap-1">
+                <Calendar className="h-4 w-4" />
+                Last updated: {lastRefresh.toLocaleTimeString()}
+              </div>
+              <div className="flex items-center gap-1">
+                <FileText className="h-4 w-4" />
+                {dashboardData ? `${dashboardData.totalResponses || 0} responses` : 'Loading...'}
+              </div>
+            </div>
           </div>
-          <div className="flex gap-2 mt-4 md:mt-0">
+          
+          <div className="flex flex-wrap gap-2">
+            <Button 
+              onClick={() => setAutoRefresh(!autoRefresh)}
+              variant={autoRefresh ? "default" : "outline"}
+              className={autoRefresh ? "bg-green-600 text-white hover:bg-green-700" : "bg-white text-black hover:bg-white/90"}
+            >
+              <Activity className="h-4 w-4 mr-2" />
+              Auto-refresh {autoRefresh ? 'ON' : 'OFF'}
+            </Button>
+            
             <Button 
               onClick={fetchAnalytics} 
               disabled={loading}
@@ -237,68 +422,104 @@ const AdminDashboard = () => {
               <RefreshCw className={`h-4 w-4 mr-2 ${loading ? 'animate-spin' : ''}`} />
               Refresh
             </Button>
-            <Button 
-              onClick={exportAnalytics}
-              className="bg-[#FFF200] text-black hover:bg-[#FFF200]/90"
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Export
-            </Button>
+            
+            <div className="flex gap-1">
+              <Button 
+                onClick={() => exportAnalytics('json')}
+                className="bg-[#FFF200] text-black hover:bg-[#FFF200]/90"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                JSON
+              </Button>
+              <Button 
+                onClick={() => exportAnalytics('csv')}
+                className="bg-blue-600 text-white hover:bg-blue-700"
+              >
+                <FileText className="h-4 w-4 mr-2" />
+                CSV
+              </Button>
+            </div>
           </div>
         </div>
         
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <Card className="bg-white">
+        {/* Enhanced Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-black">Total Responses</CardTitle>
-              <Users className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-blue-800">Total Responses</CardTitle>
+              <div className="p-2 bg-blue-500 rounded-full">
+                <Users className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">{totalResponses}</div>
-              <p className="text-xs text-muted-foreground">
-                <TrendingUp className="h-3 w-3 inline mr-1" />
+              <div className="text-3xl font-bold text-blue-900">{totalResponses}</div>
+              <p className="text-xs text-blue-600 flex items-center mt-1">
+                <TrendingUp className="h-3 w-3 mr-1" />
                 Survey submissions
               </p>
+              <div className="mt-2 h-1 bg-blue-200 rounded-full">
+                <div className="h-1 bg-blue-500 rounded-full" style={{ width: '100%' }}></div>
+              </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white">
+          <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-black">Completed</CardTitle>
-              <CheckCircle className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-green-800">Completed</CardTitle>
+              <div className="p-2 bg-green-500 rounded-full">
+                <CheckCircle className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">{completedResponses}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-green-900">{completedResponses}</div>
+              <p className="text-xs text-green-600 mt-1">
                 Fully completed surveys
               </p>
+              <div className="mt-2 h-1 bg-green-200 rounded-full">
+                <div 
+                  className="h-1 bg-green-500 rounded-full transition-all duration-500" 
+                  style={{ width: `${Math.min((completedResponses / Math.max(totalResponses, 1)) * 100, 100)}%` }}
+                ></div>
+              </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white">
+          <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-black">Completion Rate</CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-purple-800">Completion Rate</CardTitle>
+              <div className="p-2 bg-purple-500 rounded-full">
+                <BarChart3 className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">{completionRate}%</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-purple-900">{completionRate}%</div>
+              <p className="text-xs text-purple-600 mt-1">
                 Response quality metric
               </p>
+              <div className="mt-2 h-1 bg-purple-200 rounded-full">
+                <div 
+                  className="h-1 bg-purple-500 rounded-full transition-all duration-500" 
+                  style={{ width: `${completionRate}%` }}
+                ></div>
+              </div>
             </CardContent>
           </Card>
           
-          <Card className="bg-white">
+          <Card className="bg-gradient-to-br from-orange-50 to-orange-100 border-orange-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-black">Avg. Time</CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
+              <CardTitle className="text-sm font-medium text-orange-800">Avg. Time</CardTitle>
+              <div className="p-2 bg-orange-500 rounded-full">
+                <Clock className="h-4 w-4 text-white" />
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-black">{dashboardData?.avgCompletionTime || "8.4 min"}</div>
-              <p className="text-xs text-muted-foreground">
+              <div className="text-3xl font-bold text-orange-900">{dashboardData?.avgCompletionTime || "8.4 min"}</div>
+              <p className="text-xs text-orange-600 mt-1">
                 Time to complete
               </p>
+              <div className="mt-2 h-1 bg-orange-200 rounded-full">
+                <div className="h-1 bg-orange-500 rounded-full" style={{ width: '75%' }}></div>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -323,12 +544,30 @@ const AdminDashboard = () => {
                   <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
                       <BarChart data={demographicsData} margin={{ top: 20, right: 30, left: 20, bottom: 40 }}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
-                        <YAxis />
-                        <Tooltip />
+                        <defs>
+                          <linearGradient id="colorDemographics" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0.3}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45} 
+                          textAnchor="end" 
+                          height={60}
+                          fontSize={12}
+                          stroke="#666"
+                        />
+                        <YAxis fontSize={12} stroke="#666" />
+                        <Tooltip content={<CustomTooltip />} />
                         <Legend />
-                        <Bar dataKey="value" name="Respondents" fill="#8884d8" />
+                        <Bar 
+                          dataKey="value" 
+                          name="Respondents" 
+                          fill="url(#colorDemographics)"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -363,13 +602,22 @@ const AdminDashboard = () => {
                             fill="#8884d8"
                             dataKey="value"
                             label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            stroke="#fff"
+                            strokeWidth={2}
                           >
                             {educationData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={PROFESSIONAL_COLORS[index % PROFESSIONAL_COLORS.length]} 
+                              />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value) => [`${value} respondents`, 'Count']} />
-                          <Legend />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend 
+                            verticalAlign="bottom" 
+                            height={36}
+                            iconType="circle"
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
@@ -403,13 +651,22 @@ const AdminDashboard = () => {
                             fill="#8884d8"
                             dataKey="value"
                             label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                            stroke="#fff"
+                            strokeWidth={2}
                           >
                             {experienceData.map((entry, index) => (
-                              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                              <Cell 
+                                key={`cell-${index}`} 
+                                fill={GRADIENT_COLORS[index % GRADIENT_COLORS.length]} 
+                              />
                             ))}
                           </Pie>
-                          <Tooltip formatter={(value) => [`${value} respondents`, 'Count']} />
-                          <Legend />
+                          <Tooltip content={<CustomTooltip />} />
+                          <Legend 
+                            verticalAlign="bottom" 
+                            height={36}
+                            iconType="circle"
+                          />
                         </PieChart>
                       </ResponsiveContainer>
                     </div>
@@ -440,12 +697,27 @@ const AdminDashboard = () => {
                         data={adoptionData}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
+                        <defs>
+                          <linearGradient id="colorAdoption" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0.3}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="name" 
+                          fontSize={12}
+                          stroke="#666"
+                        />
+                        <YAxis fontSize={12} stroke="#666" />
+                        <Tooltip content={<CustomTooltip />} />
                         <Legend />
-                        <Bar dataKey="value" name="Respondents" fill="#82ca9d" />
+                        <Bar 
+                          dataKey="value" 
+                          name="Respondents" 
+                          fill="url(#colorAdoption)"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -473,12 +745,27 @@ const AdminDashboard = () => {
                         data={knowledgeData}
                         margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" />
-                        <YAxis />
-                        <Tooltip />
+                        <defs>
+                          <linearGradient id="colorKnowledge" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0.3}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="name" 
+                          fontSize={12}
+                          stroke="#666"
+                        />
+                        <YAxis fontSize={12} stroke="#666" />
+                        <Tooltip content={<CustomTooltip />} />
                         <Legend />
-                        <Bar dataKey="value" name="Respondents" fill="#8884d8" />
+                        <Bar 
+                          dataKey="value" 
+                          name="Respondents" 
+                          fill="url(#colorKnowledge)"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -508,12 +795,30 @@ const AdminDashboard = () => {
                         data={benefitAreasData}
                         margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
-                        <YAxis />
-                        <Tooltip />
+                        <defs>
+                          <linearGradient id="colorBenefits" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#8884d8" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#8884d8" stopOpacity={0.3}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45} 
+                          textAnchor="end" 
+                          height={60}
+                          fontSize={12}
+                          stroke="#666"
+                        />
+                        <YAxis fontSize={12} stroke="#666" />
+                        <Tooltip content={<CustomTooltip />} />
                         <Legend />
-                        <Bar dataKey="value" name="Selected by" fill="#8884d8" />
+                        <Bar 
+                          dataKey="value" 
+                          name="Selected by" 
+                          fill="url(#colorBenefits)"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
@@ -547,13 +852,22 @@ const AdminDashboard = () => {
                           fill="#8884d8"
                           dataKey="value"
                           label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                          stroke="#fff"
+                          strokeWidth={2}
                         >
                           {stakeholderViewsData.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={COLORS[index % COLORS.length]} 
+                            />
                           ))}
                         </Pie>
-                        <Tooltip formatter={(value) => [`${value} respondents`, 'Count']} />
-                        <Legend />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Legend 
+                          verticalAlign="bottom" 
+                          height={36}
+                          iconType="circle"
+                        />
                       </PieChart>
                     </ResponsiveContainer>
                   </div>
@@ -583,12 +897,30 @@ const AdminDashboard = () => {
                         data={governanceModelsData}
                         margin={{ top: 20, right: 30, left: 20, bottom: 40 }}
                       >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="name" angle={-45} textAnchor="end" height={60} />
-                        <YAxis />
-                        <Tooltip />
+                        <defs>
+                          <linearGradient id="colorGovernance" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#82ca9d" stopOpacity={0.8}/>
+                            <stop offset="95%" stopColor="#82ca9d" stopOpacity={0.3}/>
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
+                        <XAxis 
+                          dataKey="name" 
+                          angle={-45} 
+                          textAnchor="end" 
+                          height={60}
+                          fontSize={12}
+                          stroke="#666"
+                        />
+                        <YAxis fontSize={12} stroke="#666" />
+                        <Tooltip content={<CustomTooltip />} />
                         <Legend />
-                        <Bar dataKey="value" name="Preferred by" fill="#82ca9d" />
+                        <Bar 
+                          dataKey="value" 
+                          name="Preferred by" 
+                          fill="url(#colorGovernance)"
+                          radius={[4, 4, 0, 0]}
+                        />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
