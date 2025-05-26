@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { checkAuthStatus, verifyAuthStatus } from "@/utils/auth";
+import { checkAuthStatus, verifyAuthStatus, isLocallyAuthenticated } from "@/utils/auth";
 import { AdminNavBar } from "@/components/admin/AdminNavBar";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 import { 
@@ -126,12 +126,20 @@ const AdminDashboard = () => {
       console.error("Analytics error:", err);
       
       // Enhanced error handling
-      if (err.response?.status === 401) {
-        // Token expired or invalid
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        // Token expired or invalid - only clear on explicit auth failure
         localStorage.removeItem('adminAuth');
         localStorage.removeItem('token');
+        localStorage.removeItem('adminUsername');
+        localStorage.removeItem('sessionExpiry');
         setAuthenticated(false);
         toast.error("Session expired. Please login again.");
+        return;
+      } else if (err.code === 'ECONNABORTED' || !err.response) {
+        // Network error - don't clear session
+        console.warn("Analytics fetch failed due to network error, keeping session");
+        setError("Network error - please check your connection");
+        toast.error("Network error loading analytics");
         return;
       }
       
@@ -152,19 +160,30 @@ const AdminDashboard = () => {
         const isAuthenticated = checkAuthStatus();
         
         if (isAuthenticated) {
-          // Verify with server to ensure session is still valid
-          const serverAuth = await verifyAuthStatus();
-          setAuthenticated(serverAuth);
+          // Trust local session for initial load, verify server later
+          setAuthenticated(true);
           
-          if (serverAuth) {
-            await fetchAnalytics();
-          } else {
-            // Clear invalid session data
-            localStorage.removeItem('adminAuth');
-            localStorage.removeItem('token');
-            localStorage.removeItem('adminUsername');
-            toast.error("Session expired. Please login again.");
-          }
+          // Delay server verification to avoid immediate session expiry after login
+          setTimeout(async () => {
+            try {
+              const serverAuth = await verifyAuthStatus();
+              if (!serverAuth) {
+                // Only clear session if server explicitly rejects
+                localStorage.removeItem('adminAuth');
+                localStorage.removeItem('token');
+                localStorage.removeItem('adminUsername');
+                localStorage.removeItem('sessionExpiry');
+                setAuthenticated(false);
+                toast.error("Session expired. Please login again.");
+              }
+            } catch (error) {
+              console.warn("Server verification failed, keeping local session:", error);
+              // Don't clear session on network errors
+            }
+          }, 2000); // Wait 2 seconds before server verification
+          
+          // Load analytics immediately with local auth
+          await fetchAnalytics();
         } else {
           setAuthenticated(false);
         }
@@ -218,6 +237,17 @@ const AdminDashboard = () => {
       }
     };
   }, [authenticated]);
+
+  const handleLoginSuccess = useCallback(() => {
+    // Refresh authentication state after successful login
+    setAuthenticated(true);
+    setAuthLoading(false);
+    
+    // Fetch analytics data
+    fetchAnalytics();
+    
+    toast.success("Welcome to the Admin Dashboard!");
+  }, [fetchAnalytics]);
 
   const exportAnalytics = (format: 'json' | 'csv' = 'json') => {
     if (!dashboardData) {
@@ -312,7 +342,7 @@ const AdminDashboard = () => {
   if (!authenticated) {
     return (
       <AdminLoginForm 
-        onLoginSuccess={() => setAuthenticated(true)}
+        onLoginSuccess={handleLoginSuccess}
         title="Admin Dashboard Login"
         description="Enter your credentials to access questionnaire analytics"
       />

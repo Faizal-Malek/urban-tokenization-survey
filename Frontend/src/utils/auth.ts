@@ -18,6 +18,20 @@ export interface LoginCredentials {
   password: string;
 }
 
+// Simple authentication check without server verification
+export const isLocallyAuthenticated = (): boolean => {
+  try {
+    const hasAdminAuth = localStorage.getItem('adminAuth') === 'true';
+    const hasToken = !!localStorage.getItem('token');
+    const hasCookie = document.cookie.includes('jwt=');
+    
+    return hasAdminAuth && (hasToken || hasCookie);
+  } catch (error) {
+    console.error('Error checking local auth status:', error);
+    return false;
+  }
+};
+
 // Enhanced authentication status check with session persistence
 export const checkAuthStatus = (): boolean => {
   try {
@@ -81,9 +95,9 @@ export const loginAdmin = async (credentials: LoginCredentials): Promise<boolean
       localStorage.setItem('adminUsername', res.data.data.user.username);
     }
     
-    // Set session expiry (24 hours from now)
+    // Set session expiry (2 hours from now as requested)
     const expiryTime = new Date();
-    expiryTime.setHours(expiryTime.getHours() + 24);
+    expiryTime.setHours(expiryTime.getHours() + 2);
     localStorage.setItem('sessionExpiry', expiryTime.toISOString());
     
     // Store login timestamp
@@ -174,9 +188,9 @@ export const verifyAuthStatus = async (): Promise<boolean> => {
     );
     
     if (response.status === 200) {
-      // Refresh session expiry on successful verification
+      // Refresh session expiry on successful verification (2 hours)
       const expiryTime = new Date();
-      expiryTime.setHours(expiryTime.getHours() + 24);
+      expiryTime.setHours(expiryTime.getHours() + 2);
       localStorage.setItem('sessionExpiry', expiryTime.toISOString());
       return true;
     }
@@ -189,13 +203,15 @@ export const verifyAuthStatus = async (): Promise<boolean> => {
     if (error.response?.status === 401 || error.response?.status === 403) {
       // Unauthorized - clear auth data
       clearAuthData();
-      toast.error("Session expired. Please login again.");
-    } else if (error.code === 'ECONNABORTED') {
-      console.warn("Auth verification timeout - assuming valid session");
-      return true; // Don't clear session on network timeout
+      return false;
+    } else if (error.code === 'ECONNABORTED' || error.code === 'ECONNRESET' || !error.response) {
+      console.warn("Auth verification network error - assuming valid session");
+      return true; // Don't clear session on network errors
     }
     
-    return false;
+    // For other errors, assume session is still valid to avoid false positives
+    console.warn("Auth verification error, assuming valid session:", error.message);
+    return true;
   }
 };
 
