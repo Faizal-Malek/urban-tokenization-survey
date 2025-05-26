@@ -19,7 +19,7 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser());
 app.use(helmet());
-// Instead of two CORS configurations, use just one:
+// CORS configuration
 app.use(cors({
   origin: [
     'https://urban-tokenization-survey.vercel.app',
@@ -30,10 +30,6 @@ app.use(cors({
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
-}));
-app.use(cors({
-  origin: ["https://urban-tokenization-survey.vercel.app"],
-  credentials: true,
 }));
 
 // Rate limiting

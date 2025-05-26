@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { checkAuthStatus } from "@/utils/auth";
+import { checkAuthStatus, verifyAuthStatus } from "@/utils/auth";
 import { AdminNavBar } from "@/components/admin/AdminNavBar";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 import { 
@@ -38,6 +38,7 @@ const COLORS = ['#8884d8', '#83a6ed', '#8dd1e1', '#82ca9d', '#a4de6c', '#d0ed57'
 
 const AdminDashboard = () => {
   const [authenticated, setAuthenticated] = useState(checkAuthStatus());
+  const [authLoading, setAuthLoading] = useState(true);
   const [dashboardData, setDashboardData] = useState<any>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -72,8 +73,32 @@ const AdminDashboard = () => {
   };
 
   useEffect(() => {
-    fetchAnalytics();
-  }, [authenticated]);
+    const verifyAuth = async () => {
+      setAuthLoading(true);
+      const isAuthenticated = checkAuthStatus();
+      
+      if (isAuthenticated) {
+        // Verify with server
+        const serverAuth = await verifyAuthStatus();
+        setAuthenticated(serverAuth);
+        if (serverAuth) {
+          fetchAnalytics();
+        }
+      } else {
+        setAuthenticated(false);
+      }
+      
+      setAuthLoading(false);
+    };
+    
+    verifyAuth();
+  }, []);
+
+  useEffect(() => {
+    if (authenticated && !authLoading) {
+      fetchAnalytics();
+    }
+  }, [authenticated, authLoading]);
 
   const exportAnalytics = () => {
     if (!dashboardData) {
@@ -113,6 +138,17 @@ const AdminDashboard = () => {
     
     toast.success("Analytics data exported successfully");
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-black to-[#FFF200] flex items-center justify-center">
+        <div className="text-center">
+          <RefreshCw className="h-8 w-8 animate-spin text-[#FFF200] mx-auto mb-4" />
+          <p className="text-white text-lg">Verifying authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!authenticated) {
     return (

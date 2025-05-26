@@ -22,8 +22,14 @@ export const protect = async (
   next: NextFunction
 ) => {
   try {
-    // 1) Get token from cookies
-    const token = req.cookies.jwt;
+    let token;
+
+    // 1) Get token from cookies or Authorization header
+    if (req.cookies.jwt) {
+      token = req.cookies.jwt;
+    } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
+      token = req.headers.authorization.split(' ')[1];
+    }
 
     if (!token) {
       return next(new AppError('Please log in to access this resource', 401));

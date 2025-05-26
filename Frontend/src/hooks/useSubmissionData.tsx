@@ -52,16 +52,21 @@ export const useSubmissionData = () => {
         // Transform the data to match our Submission type
         const formattedSubmissions = data.submissions.map((item: any, index: number) => {
           const responses = item.responses || {};
+          const demographics = responses.demographics || {};
+          const knowledge = responses.knowledge || {};
+          const future = responses.future || {};
+          const stakeholders = responses.stakeholders || {};
+          
           return {
             id: item._id || `S${String(index + 1).padStart(3, '0')}`,
             date: item.submittedAt ? new Date(item.submittedAt).toISOString().split('T')[0] : 'Unknown',
-            occupation: responses.occupation || 'Not specified',
-            educationLevel: responses.educationLevel || 'Not specified',
-            yearsOfExperience: responses.yearsOfExperience || 'Not specified',
-            blockchainFamiliarity: responses.blockchainFamiliarity || 'Not specified',
+            occupation: demographics.occupation || responses.occupation || 'Not specified',
+            educationLevel: demographics.educationLevel || responses.educationLevel || 'Not specified',
+            yearsOfExperience: demographics.yearsOfExperience || responses.yearsOfExperience || 'Not specified',
+            blockchainFamiliarity: knowledge.blockchainFamiliarity || responses.blockchainFamiliarity || 'Not specified',
             participatedProjects: responses.participatedProjects || 'No',
-            adoptionLikelihood: responses.adoptionLikelihood || 'Not specified',
-            stakeholderViews: responses.stakeholderViews || 'Not specified',
+            adoptionLikelihood: future.adoptionLikelihood || responses.adoptionLikelihood || 'Not specified',
+            stakeholderViews: stakeholders.stakeholderViews || responses.stakeholderViews || 'Not specified',
           };
         });
         

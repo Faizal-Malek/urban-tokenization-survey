@@ -6,12 +6,13 @@ import { SubmissionHeader } from "@/components/admin/SubmissionHeader";
 import { SubmissionsTable } from "@/components/admin/SubmissionsTable";
 import { SubmissionPreviewModal } from "@/components/admin/SubmissionPreviewModal";
 import { useSubmissionData } from "@/hooks/useSubmissionData";
-import { checkAuthStatus } from "@/utils/auth";
+import { checkAuthStatus, verifyAuthStatus } from "@/utils/auth";
 import { AdminNavBar } from "@/components/admin/AdminNavBar";
 import { AdminLoginForm } from "@/components/admin/AdminLoginForm";
 
 const AdminSubmissions = () => {
   const [authenticated, setAuthenticated] = useState(checkAuthStatus());
+  const [authLoading, setAuthLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const { 
     filteredSubmissions, 
@@ -23,6 +24,26 @@ const AdminSubmissions = () => {
     error
   } = useSubmissionData();
 
+  // Verify authentication on component mount
+  useEffect(() => {
+    const verifyAuth = async () => {
+      setAuthLoading(true);
+      const isAuthenticated = checkAuthStatus();
+      
+      if (isAuthenticated) {
+        // Verify with server
+        const serverAuth = await verifyAuthStatus();
+        setAuthenticated(serverAuth);
+      } else {
+        setAuthenticated(false);
+      }
+      
+      setAuthLoading(false);
+    };
+    
+    verifyAuth();
+  }, []);
+
   // Preview a submission
   const handlePreview = (submission) => {
     setSelectedSubmission(submission);
@@ -32,6 +53,17 @@ const AdminSubmissions = () => {
   const handleClosePreview = () => {
     setSelectedSubmission(null);
   };
+
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-black via-black to-[#FFF200] flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#FFF200] mx-auto mb-4"></div>
+          <p className="text-white text-lg">Verifying authentication...</p>
+        </div>
+      </div>
+    );
+  }
 
   if (!authenticated) {
     return (

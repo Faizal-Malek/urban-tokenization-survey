@@ -20,7 +20,11 @@ export interface LoginCredentials {
 
 // Check if user is already authenticated
 export const checkAuthStatus = (): boolean => {
-  return localStorage.getItem('adminAuth') === 'true' || !!localStorage.getItem('token');
+  const hasAdminAuth = localStorage.getItem('adminAuth') === 'true';
+  const hasToken = !!localStorage.getItem('token');
+  const hasCookie = document.cookie.includes('jwt=');
+  
+  return hasAdminAuth && (hasToken || hasCookie);
 };
 
 // Login function that can be shared across admin components
@@ -75,4 +79,30 @@ export const logoutAdmin = (): void => {
 // Get authenticated user's username
 export const getAdminUsername = (): string => {
   return localStorage.getItem('adminUsername') || 'Admin';
+};
+
+// Verify authentication status with server
+export const verifyAuthStatus = async (): Promise<boolean> => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    const response = await axios.get(
+      "https://urban-tokenization-survey.onrender.com/api/admin/users",
+      {
+        withCredentials: true,
+        headers: {
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        }
+      }
+    );
+    
+    return response.status === 200;
+  } catch (error) {
+    console.error("Auth verification failed:", error);
+    // Clear invalid auth data
+    localStorage.removeItem('adminAuth');
+    localStorage.removeItem('token');
+    localStorage.removeItem('adminUsername');
+    return false;
+  }
 };
