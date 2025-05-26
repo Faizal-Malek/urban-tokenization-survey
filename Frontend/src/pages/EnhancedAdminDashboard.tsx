@@ -51,6 +51,7 @@ const EnhancedAdminDashboard = () => {
       const apiBaseUrl = getApiBaseUrl();
       
       console.log("Fetching analytics from:", `${apiBaseUrl}/api/questionnaire/analytics`);
+      console.log("Using token:", token ? `${token.substring(0, 20)}...` : 'No token');
       
       const response = await axios.get(`${apiBaseUrl}/api/questionnaire/analytics`, { 
         headers: {
@@ -60,7 +61,7 @@ const EnhancedAdminDashboard = () => {
           'Content-Type': 'application/json'
         },
         timeout: 30000,
-        withCredentials: false // Disable credentials to avoid CORS issues
+        withCredentials: true // Enable credentials for cookie-based auth
       });
       
       console.log("Analytics data received:", response.data);
@@ -94,8 +95,20 @@ const EnhancedAdminDashboard = () => {
       toast.success("Analytics data refreshed successfully");
     } catch (err: any) {
       console.error("Analytics error:", err);
+      console.error("Error details:", {
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        headers: err.response?.headers,
+        config: {
+          url: err.config?.url,
+          method: err.config?.method,
+          headers: err.config?.headers
+        }
+      });
       
       if (err.response?.status === 401 || err.response?.status === 403) {
+        console.log("Authentication failed, clearing session data");
         localStorage.removeItem('adminAuth');
         localStorage.removeItem('token');
         localStorage.removeItem('adminUsername');
@@ -105,7 +118,20 @@ const EnhancedAdminDashboard = () => {
         return;
       }
       
-      const errorMessage = err.response?.data?.message || err.message || "Failed to load analytics data";
+      let errorMessage = "Failed to load analytics data";
+      
+      if (err.response?.data?.message) {
+        errorMessage = err.response.data.message;
+      } else if (err.response?.data?.debug) {
+        errorMessage = `${err.response.data.message || 'Authentication error'} (Debug: ${JSON.stringify(err.response.data.debug)})`;
+      } else if (err.code === 'ECONNABORTED') {
+        errorMessage = "Request timeout - please check your connection";
+      } else if (err.code === 'ERR_NETWORK') {
+        errorMessage = "Network error - unable to reach server";
+      } else if (err.message) {
+        errorMessage = err.message;
+      }
+      
       setError(errorMessage);
       toast.error("Failed to load analytics: " + errorMessage);
     } finally {

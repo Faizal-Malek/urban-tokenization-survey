@@ -27,12 +27,30 @@ export const protect = async (
     // 1) Get token from cookies or Authorization header
     if (req.cookies.jwt) {
       token = req.cookies.jwt;
+      console.log('Token found in cookies');
     } else if (req.headers.authorization && req.headers.authorization.startsWith('Bearer ')) {
       token = req.headers.authorization.split(' ')[1];
+      console.log('Token found in Authorization header');
     }
 
+    // Debug logging
+    console.log('Auth middleware - Headers:', {
+      authorization: req.headers.authorization ? 'Present' : 'Missing',
+      origin: req.headers.origin,
+      'user-agent': req.headers['user-agent']?.substring(0, 50)
+    });
+
     if (!token) {
-      return next(new AppError('Please log in to access this resource', 401));
+      console.log('No token found in request');
+      return res.status(401).json({
+        status: 'error',
+        message: 'Please log in to access this resource',
+        debug: {
+          cookiePresent: !!req.cookies.jwt,
+          authHeaderPresent: !!req.headers.authorization,
+          authHeaderValue: req.headers.authorization ? req.headers.authorization.substring(0, 20) + '...' : 'None'
+        }
+      });
     }
 
     // 2) Verify token
@@ -41,17 +59,33 @@ export const protect = async (
       process.env.JWT_SECRET!
     ) as JwtPayload;
 
+    console.log('Token decoded successfully for user:', decoded.id);
+
     // 3) Check if user still exists
     const user = await User.findById(decoded.id);
     if (!user) {
-      return next(new AppError('User no longer exists', 401));
+      console.log('User not found for ID:', decoded.id);
+      return res.status(401).json({
+        status: 'error',
+        message: 'User no longer exists'
+      });
     }
+
+    console.log('User authenticated:', user.username, 'Role:', user.role);
 
     // 4) Grant access to protected route
     req.user = user;
     next();
-  } catch (error) {
-    next(new AppError('Invalid token. Please log in again', 401));
+  } catch (error: any) {
+    console.error('Auth middleware error:', error.message);
+    return res.status(401).json({
+      status: 'error',
+      message: 'Invalid token. Please log in again',
+      debug: {
+        error: error.message,
+        tokenPresent: !!req.headers.authorization || !!req.cookies.jwt
+      }
+    });
   }
 };
 

@@ -36,7 +36,9 @@ const corsOptions = {
       /^http:\/\/localhost:\d+$/,
       /^http:\/\/127\.0\.0\.1:\d+$/,
       // Allow work environment URLs
-      /^https:\/\/work-\d+-\w+\.prod-runtime\.all-hands\.dev$/
+      /^https:\/\/work-\d+-\w+\.prod-runtime\.all-hands\.dev$/,
+      // Allow any Vercel deployment URLs
+      /^https:\/\/.*\.vercel\.app$/
     ];
     
     const isAllowed = allowedOrigins.some(allowed => {
@@ -55,11 +57,25 @@ const corsOptions = {
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Accept']
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type', 
+    'Authorization', 
+    'Cache-Control', 
+    'Accept',
+    'Origin',
+    'X-Requested-With',
+    'Access-Control-Allow-Headers',
+    'Access-Control-Allow-Origin'
+  ],
+  exposedHeaders: ['Authorization'],
+  optionsSuccessStatus: 200 // For legacy browser support
 };
 
 app.use(cors(corsOptions));
+
+// Handle preflight requests explicitly
+app.options('*', cors(corsOptions));
 
 // Rate limiting
 const limiter = rateLimit({
@@ -67,6 +83,16 @@ const limiter = rateLimit({
   max: 100 // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
+
+// Health check endpoint
+app.get('/health', (req, res) => {
+  res.status(200).json({
+    status: 'success',
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    environment: process.env.NODE_ENV || 'development'
+  });
+});
 
 // Routes
 app.use('/api/auth', authRoutes);
