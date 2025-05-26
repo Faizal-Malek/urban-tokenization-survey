@@ -88,15 +88,36 @@ const AdminDashboard = () => {
     
     try {
       const token = localStorage.getItem('token');
+      console.log("Fetching analytics with token:", token ? "Present" : "Missing");
+      console.log("Current URL:", window.location.href);
       
-      const response = await axios.get("https://urban-tokenization-survey.onrender.com/api/questionnaire/analytics", { 
-        withCredentials: true,
-        headers: {
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
-          'Cache-Control': 'no-cache'
-        },
-        timeout: 30000 // 30 second timeout
-      });
+      let response;
+      
+      try {
+        // First attempt with credentials
+        response = await axios.get("https://urban-tokenization-survey.onrender.com/api/questionnaire/analytics", { 
+          withCredentials: true,
+          headers: {
+            ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+            'Cache-Control': 'no-cache',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000 // 30 second timeout
+        });
+      } catch (firstError: any) {
+        console.warn("First attempt failed, trying without credentials:", firstError.message);
+        
+        // Second attempt without credentials (for CORS issues)
+        response = await axios.get("https://urban-tokenization-survey.onrender.com/api/questionnaire/analytics", { 
+          headers: {
+            'Cache-Control': 'no-cache',
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          },
+          timeout: 30000 // 30 second timeout
+        });
+      }
       
       console.log("Analytics data structure:", JSON.stringify(response.data, null, 2));
       
@@ -123,9 +144,18 @@ const AdminDashboard = () => {
       setLastRefresh(new Date());
       toast.success("Analytics data refreshed successfully");
     } catch (err: any) {
-      console.error("Analytics error:", err);
+      console.error("Analytics error details:", {
+        message: err.message,
+        code: err.code,
+        response: err.response,
+        status: err.response?.status,
+        statusText: err.response?.statusText,
+        data: err.response?.data,
+        headers: err.response?.headers,
+        config: err.config
+      });
       
-      // Enhanced error handling
+      // Enhanced error handling with detailed logging
       if (err.response?.status === 401 || err.response?.status === 403) {
         // Token expired or invalid - only clear on explicit auth failure
         localStorage.removeItem('adminAuth');
@@ -140,6 +170,12 @@ const AdminDashboard = () => {
         console.warn("Analytics fetch failed due to network error, keeping session");
         setError("Network error - please check your connection");
         toast.error("Network error loading analytics");
+        return;
+      } else if (err.message?.includes('CORS') || err.message?.includes('cross-origin')) {
+        // CORS error
+        console.error("CORS error detected");
+        setError("CORS error - please contact administrator");
+        toast.error("Access denied - CORS policy issue");
         return;
       }
       
@@ -355,6 +391,7 @@ const AdminDashboard = () => {
         <div className="text-center">
           <RefreshCw className="h-8 w-8 animate-spin text-[#FFF200] mx-auto mb-4" />
           <p className="text-white text-lg">Loading analytics...</p>
+          <p className="text-white/70 text-sm mt-2">Connecting to server...</p>
         </div>
       </div>
     );
@@ -363,15 +400,22 @@ const AdminDashboard = () => {
   if (error && !dashboardData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black via-black to-[#FFF200] flex items-center justify-center">
-        <div className="text-center">
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
-            <p className="font-bold">Error loading analytics</p>
-            <p>{error}</p>
+        <div className="text-center max-w-md mx-auto p-6">
+          <AlertCircle className="h-12 w-12 text-red-400 mx-auto mb-4" />
+          <h2 className="text-white text-xl font-bold mb-2">Error Loading Analytics</h2>
+          <p className="text-white/80 mb-4">{error}</p>
+          <div className="space-y-2">
+            <Button 
+              onClick={fetchAnalytics} 
+              className="bg-[#FFF200] text-black hover:bg-[#FFF200]/90 w-full"
+            >
+              <RefreshCw className="h-4 w-4 mr-2" />
+              Retry
+            </Button>
+            <p className="text-white/60 text-xs">
+              Current URL: {window.location.href}
+            </p>
           </div>
-          <Button onClick={fetchAnalytics} className="bg-[#FFF200] text-black hover:bg-[#FFF200]/90">
-            <RefreshCw className="h-4 w-4 mr-2" />
-            Retry
-          </Button>
         </div>
       </div>
     );
