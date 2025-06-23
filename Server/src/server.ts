@@ -29,7 +29,7 @@ const corsOptions = {
       'https://urban-tokenization-survey.vercel.app',
       'https://urban-tokenization-survey-git-main-faizals-projects-bee3353c.vercel.app',
       'http://localhost:3000',
-      'http://localhost:5173',
+      // 'http://localhost:5173',
       'http://127.0.0.1:3000',
       'http://127.0.0.1:5173',
       // Allow any localhost port for development
