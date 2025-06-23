@@ -663,46 +663,28 @@ const AdminDashboard = () => {
                   <CardDescription>Educational background of respondents</CardDescription>
                 </CardHeader>
                 <CardContent>
-                  {educationData.length > 0 ? (
-                    <div className="h-64">
-                      <ResponsiveContainer width="100%" height="100%">
-                        <PieChart>
-                          <Pie
-                            data={educationData}
-                            cx="50%"
-                            cy="50%"
-                            labelLine={false}
-                            outerRadius={80}
-                            fill="#8884d8"
-                            dataKey="value"
-                            label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
-                            stroke="#fff"
-                            strokeWidth={2}
-                          >
-                            {educationData.map((entry, index) => (
-                              <Cell 
-                                key={`cell-${index}`} 
-                                fill={PROFESSIONAL_COLORS[index % PROFESSIONAL_COLORS.length]} 
-                              />
-                            ))}
-                          </Pie>
-                          <Tooltip content={<CustomTooltip />} />
-                          <Legend 
-                            verticalAlign="bottom" 
-                            height={36}
-                            iconType="circle"
-                          />
-                        </PieChart>
-                      </ResponsiveContainer>
-                    </div>
-                  ) : (
-                    <div className="h-64 flex items-center justify-center text-gray-500">
-                      <div className="text-center">
-                        <CheckCircle className="h-12 w-12 mx-auto mb-4 text-gray-300" />
-                        <p>No education data available</p>
-                      </div>
-                    </div>
-                  )}
+                  <div className="h-64">
+                    <ResponsiveContainer width="100%" height="100%">
+                      <PieChart>
+                        <Pie
+                          data={dashboardData?.education || []}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          outerRadius={80}
+                          fill="#8884d8"
+                          dataKey="value"
+                          label={({name, percent}) => `${name} ${(percent * 100).toFixed(0)}%`}
+                        >
+                          {(dashboardData?.education || []).map((entry, index) => (
+                            <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                          ))}
+                        </Pie>
+                        <Tooltip formatter={(value) => [`${value} respondents`, 'Count']} />
+                        <Legend />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
                 </CardContent>
               </Card>
               
