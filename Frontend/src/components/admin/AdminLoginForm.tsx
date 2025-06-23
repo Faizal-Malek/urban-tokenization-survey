@@ -29,9 +29,9 @@ export const AdminLoginForm = ({ onLoginSuccess, title, description }: AdminLogi
     <div className="min-h-screen bg-gradient-to-br from-black via-black to-[#FFF200] flex flex-col">
       {/* Modern Fixed Navigation Bar (no icon) */}
       <nav className="fixed top-0 left-1/2 -translate-x-1/2 z-50 w-[95vw] max-w-5xl bg-[#fffbe6]/90 rounded-xl shadow flex items-center justify-between px-8 py-4 border border-yellow-100">
-        <span className="font-bold text-xl text-gray-900">Urban Infrastructure Tokenization Survey</span>
+        <span className="font-bold text-xl text-gray-900">UIT Survey</span>
         <a href="/" className="bg-white px-5 py-2 rounded-md shadow text-black font-semibold hover:bg-gray-100 transition">
-          Back to Main
+          Home
         </a>
       </nav>
       {/* Centered Login Card */}
