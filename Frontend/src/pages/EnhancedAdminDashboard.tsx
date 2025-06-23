@@ -16,10 +16,20 @@ import {
   TrendingUp,
   Users,
   Settings,
-  FileText
+  FileText,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const EnhancedAdminDashboard = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -29,6 +39,7 @@ const EnhancedAdminDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const isMobile = useIsMobile();
 
   // Get API base URL from environment or use localhost for development
   const getApiBaseUrl = () => {
@@ -383,20 +394,49 @@ const EnhancedAdminDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="charts" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="charts" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Charts & Visualizations
-            </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Insights & Analysis
-            </TabsTrigger>
-            <TabsTrigger value="raw-data" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Raw Data
-            </TabsTrigger>
-          </TabsList>
+          {isMobile ? (
+            <div className="relative">
+              <Carousel opts={{ align: "start" }} className="w-full">
+                <CarouselContent className="ml-0">
+                  <CarouselItem className="basis-auto pl-0 pr-4">
+                    <TabsTrigger value="charts" className="flex items-center gap-2 whitespace-nowrap">
+                      <BarChart3 className="h-4 w-4" />
+                      Charts & Visualizations
+                    </TabsTrigger>
+                  </CarouselItem>
+                  <CarouselItem className="basis-auto pl-0 pr-4">
+                    <TabsTrigger value="insights" className="flex items-center gap-2 whitespace-nowrap">
+                      <TrendingUp className="h-4 w-4" />
+                      Insights & Analysis
+                    </TabsTrigger>
+                  </CarouselItem>
+                  <CarouselItem className="basis-auto pl-0 pr-4">
+                    <TabsTrigger value="raw-data" className="flex items-center gap-2 whitespace-nowrap">
+                      <Users className="h-4 w-4" />
+                      Raw Data
+                    </TabsTrigger>
+                  </CarouselItem>
+                </CarouselContent>
+                <CarouselPrevious className="left-0 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-none text-white" />
+                <CarouselNext className="right-0 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-none text-white" />
+              </Carousel>
+            </div>
+          ) : (
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="charts" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Charts & Visualizations
+              </TabsTrigger>
+              <TabsTrigger value="insights" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Insights & Analysis
+              </TabsTrigger>
+              <TabsTrigger value="raw-data" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Raw Data
+              </TabsTrigger>
+            </TabsList>
+          )}
 
           <TabsContent value="charts" className="space-y-6">
             <AnalyticsCharts data={dashboardData} loading={loading} />
