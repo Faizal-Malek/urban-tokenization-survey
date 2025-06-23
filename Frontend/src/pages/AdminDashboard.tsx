@@ -452,10 +452,10 @@ const AdminDashboard = () => {
   const governanceModelsData = getChartData('governanceModels');
   
   return (
-    <div className="bg-gradient-to-br from-black via-black to-[#FFF200] min-h-screen pb-16">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <AdminNavBar currentPage="dashboard" />
       
-      <div className="container mx-auto pt-24 px-4">
+      <div className="container mx-auto px-4 py-8 mt-28">
         <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-8 gap-4">
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
