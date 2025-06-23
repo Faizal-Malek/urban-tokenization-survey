@@ -16,10 +16,20 @@ import {
   TrendingUp,
   Users,
   Settings,
-  FileText
+  FileText,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
 import axios from "axios";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
 
 const EnhancedAdminDashboard = () => {
   const [authenticated, setAuthenticated] = useState(false);
@@ -315,6 +325,8 @@ const EnhancedAdminDashboard = () => {
     );
   }
 
+  const isMobile = useIsMobile();
+  
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-black to-[#FFF200]">
       <AdminNavBar />
@@ -383,30 +395,59 @@ const EnhancedAdminDashboard = () => {
 
         {/* Main Content Tabs */}
         <Tabs defaultValue="charts" className="space-y-6">
-          <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="charts" className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4" />
-              Charts & Visualizations
-            </TabsTrigger>
-            <TabsTrigger value="insights" className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4" />
-              Insights & Analysis
-            </TabsTrigger>
-            <TabsTrigger value="raw-data" className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
-              Raw Data
-            </TabsTrigger>
-          </TabsList>
+          {isMobile ? (
+            <div className="relative">
+              <Carousel className="w-full">
+                <CarouselContent>
+                  <CarouselItem className="basis-1/2">
+                    <TabsTrigger value="charts" className="flex items-center gap-2 w-full">
+                      <BarChart3 className="h-4 w-4" />
+                      Charts
+                    </TabsTrigger>
+                  </CarouselItem>
+                  <CarouselItem className="basis-1/2">
+                    <TabsTrigger value="insights" className="flex items-center gap-2 w-full">
+                      <TrendingUp className="h-4 w-4" />
+                      Insights
+                    </TabsTrigger>
+                  </CarouselItem>
+                  <CarouselItem className="basis-1/2">
+                    <TabsTrigger value="raw-data" className="flex items-center gap-2 w-full">
+                      <Users className="h-4 w-4" />
+                      Raw Data
+                    </TabsTrigger>
+                  </CarouselItem>
+                </CarouselContent>
+                <CarouselPrevious className="left-0 bg-black/50 text-white hover:bg-black/70" />
+                <CarouselNext className="right-0 bg-black/50 text-white hover:bg-black/70" />
+              </Carousel>
+            </div>
+          ) : (
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="charts" className="flex items-center gap-2">
+                <BarChart3 className="h-4 w-4" />
+                Charts & Visualizations
+              </TabsTrigger>
+              <TabsTrigger value="insights" className="flex items-center gap-2">
+                <TrendingUp className="h-4 w-4" />
+                Insights & Analysis
+              </TabsTrigger>
+              <TabsTrigger value="raw-data" className="flex items-center gap-2">
+                <Users className="h-4 w-4" />
+                Raw Data
+              </TabsTrigger>
+            </TabsList>
+          )}
 
-          <TabsContent value="charts" className="space-y-6">
+          <TabsContent value="charts">
             <AnalyticsCharts data={dashboardData} loading={loading} />
           </TabsContent>
-
-          <TabsContent value="insights" className="space-y-6">
+          
+          <TabsContent value="insights">
             <AnalyticsInsights data={dashboardData} loading={loading} />
           </TabsContent>
-
-          <TabsContent value="raw-data" className="space-y-6">
+          
+          <TabsContent value="raw-data">
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
