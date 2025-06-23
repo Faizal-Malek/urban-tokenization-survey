@@ -34,37 +34,37 @@ export const SubmissionsTable = ({ submissions, onPreview }: SubmissionsTablePro
       <div className="overflow-x-auto print:overflow-visible" id="submission-table">
         <Table>
           <TableCaption>
-            <div className="flex items-center justify-center gap-2">
+            <div className="flex items-center justify-center gap-2 text-black">
               <FileSpreadsheetIcon className="w-5 h-5" />
               <span>Total submissions: {submissions.length}</span>
             </div>
           </TableCaption>
           <TableHeader className="bg-gray-100">
             <TableRow>
-              <TableHead className="w-[80px]">ID</TableHead>
-              <TableHead className="w-[120px]">Date</TableHead>
-              <TableHead>Occupation</TableHead>
-              <TableHead>Education Level</TableHead>
-              <TableHead>Experience</TableHead>
-              <TableHead>Blockchain Familiarity</TableHead>
-              <TableHead>Project Experience</TableHead>
-              <TableHead>Adoption Likelihood</TableHead>
-              <TableHead>Stakeholder Views</TableHead>
-              <TableHead className="w-[80px]">Actions</TableHead>
+              <TableHead className="w-[80px] text-black">ID</TableHead>
+              <TableHead className="w-[120px] text-black">Date</TableHead>
+              <TableHead className="text-black">Occupation</TableHead>
+              <TableHead className="text-black">Education Level</TableHead>
+              <TableHead className="text-black">Experience</TableHead>
+              <TableHead className="text-black">Blockchain Familiarity</TableHead>
+              <TableHead className="text-black">Project Experience</TableHead>
+              <TableHead className="text-black">Adoption Likelihood</TableHead>
+              <TableHead className="text-black">Stakeholder Views</TableHead>
+              <TableHead className="w-[80px] text-black">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {submissions.map((submission) => (
               <TableRow key={submission.id} className="border-b hover:bg-gray-50">
-                <TableCell className="font-medium">{submission.id}</TableCell>
-                <TableCell>{submission.date}</TableCell>
-                <TableCell>{submission.occupation}</TableCell>
-                <TableCell>{submission.educationLevel}</TableCell>
-                <TableCell>{submission.yearsOfExperience}</TableCell>
-                <TableCell>{submission.blockchainFamiliarity}</TableCell>
-                <TableCell>{submission.participatedProjects}</TableCell>
-                <TableCell>{submission.adoptionLikelihood}</TableCell>
-                <TableCell>{submission.stakeholderViews}</TableCell>
+                <TableCell className="font-medium text-black">{submission.id}</TableCell>
+                <TableCell className="text-black">{submission.date}</TableCell>
+                <TableCell className="text-black">{submission.occupation}</TableCell>
+                <TableCell className="text-black">{submission.educationLevel}</TableCell>
+                <TableCell className="text-black">{submission.yearsOfExperience}</TableCell>
+                <TableCell className="text-black">{submission.blockchainFamiliarity}</TableCell>
+                <TableCell className="text-black">{submission.participatedProjects}</TableCell>
+                <TableCell className="text-black">{submission.adoptionLikelihood}</TableCell>
+                <TableCell className="text-black">{submission.stakeholderViews}</TableCell>
                 <TableCell>
                   <button 
                     onClick={() => onPreview(submission)} 
