@@ -23,12 +23,12 @@ import {
 import axios from "axios";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { 
-  Carousel, 
-  CarouselContent, 
-  CarouselItem, 
-  CarouselNext, 
-  CarouselPrevious 
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
 } from "@/components/ui/carousel";
 
 const EnhancedAdminDashboard = () => {
@@ -39,6 +39,7 @@ const EnhancedAdminDashboard = () => {
   const [error, setError] = useState<string | null>(null);
   const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
   const [autoRefresh, setAutoRefresh] = useState(false);
+  const isMobile = useIsMobile();
 
   // Get API base URL from environment or use localhost for development
   const getApiBaseUrl = () => {
@@ -325,7 +326,6 @@ const EnhancedAdminDashboard = () => {
     );
   }
 
-  // Inside the return statement, replace the TabsList section with this:
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-black to-[#FFF200]">
       <AdminNavBar />
@@ -398,27 +398,27 @@ const EnhancedAdminDashboard = () => {
             <div className="relative">
               <Carousel opts={{ align: "start" }} className="w-full">
                 <CarouselContent className="ml-0">
-                  <CarouselItem className="basis-1/2 pl-0 pr-2">
-                    <TabsTrigger value="charts" className="w-full flex items-center gap-2">
+                  <CarouselItem className="basis-auto pl-0 pr-4">
+                    <TabsTrigger value="charts" className="flex items-center gap-2 whitespace-nowrap">
                       <BarChart3 className="h-4 w-4" />
-                      Charts
+                      Charts & Visualizations
                     </TabsTrigger>
                   </CarouselItem>
-                  <CarouselItem className="basis-1/2 pl-2 pr-0">
-                    <TabsTrigger value="insights" className="w-full flex items-center gap-2">
+                  <CarouselItem className="basis-auto pl-0 pr-4">
+                    <TabsTrigger value="insights" className="flex items-center gap-2 whitespace-nowrap">
                       <TrendingUp className="h-4 w-4" />
-                      Insights
+                      Insights & Analysis
                     </TabsTrigger>
                   </CarouselItem>
-                  <CarouselItem className="basis-1/2 pl-0 pr-2">
-                    <TabsTrigger value="raw-data" className="w-full flex items-center gap-2">
+                  <CarouselItem className="basis-auto pl-0 pr-4">
+                    <TabsTrigger value="raw-data" className="flex items-center gap-2 whitespace-nowrap">
                       <Users className="h-4 w-4" />
                       Raw Data
                     </TabsTrigger>
                   </CarouselItem>
                 </CarouselContent>
-                <CarouselPrevious className="left-0 top-1/2 -translate-y-1/2" />
-                <CarouselNext className="right-0 top-1/2 -translate-y-1/2" />
+                <CarouselPrevious className="left-0 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-none text-white" />
+                <CarouselNext className="right-0 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 border-none text-white" />
               </Carousel>
             </div>
           ) : (
@@ -438,7 +438,6 @@ const EnhancedAdminDashboard = () => {
             </TabsList>
           )}
 
-          {/* Tab content remains the same */}
           <TabsContent value="charts" className="space-y-6">
             <AnalyticsCharts data={dashboardData} loading={loading} />
           </TabsContent>
