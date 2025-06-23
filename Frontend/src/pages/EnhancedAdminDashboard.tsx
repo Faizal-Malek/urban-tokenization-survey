@@ -316,7 +316,7 @@ const EnhancedAdminDashboard = () => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div className="min-h-screen bg-gradient-to-br from-black via-black to-[#FFF200]">
       <AdminNavBar />
       
       <div className="container mx-auto px-4 pt-28 pb-8">
@@ -324,14 +324,14 @@ const EnhancedAdminDashboard = () => {
         <div className="mb-8">
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
+              <h1 className="text-3xl font-bold text-[#FFF200] mb-2">
                 Enhanced Analytics Dashboard
               </h1>
-              <p className="text-gray-600">
+              <p className="text-gray-300">
                 Comprehensive insights and analytics for the Urban Tokenization Survey
               </p>
               {dashboardData?.lastUpdated && (
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-gray-400 mt-1">
                   Last updated: {new Date(dashboardData.lastUpdated).toLocaleString()}
                 </p>
               )}

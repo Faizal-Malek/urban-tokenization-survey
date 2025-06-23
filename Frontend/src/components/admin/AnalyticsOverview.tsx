@@ -124,7 +124,7 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ data, load
         return (
           <Card key={index} className="hover:shadow-lg transition-shadow duration-200">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium text-white">
+              <CardTitle className="text-sm font-medium text-gray-800">
                 {card.title}
               </CardTitle>
               <div className={`p-2 rounded-lg ${card.bgColor}`}>
@@ -132,11 +132,11 @@ export const AnalyticsOverview: React.FC<AnalyticsOverviewProps> = ({ data, load
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold text-white mb-1">
+              <div className="text-2xl font-bold text-gray-900 mb-1">
                 {card.value}
               </div>
               <div className="flex items-center justify-between">
-                <p className="text-xs text-gray-300">
+                <p className="text-xs text-gray-600">
                   {card.description}
                 </p>
                 <Badge variant="secondary" className="text-xs">

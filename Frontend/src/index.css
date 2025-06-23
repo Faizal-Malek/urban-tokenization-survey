@@ -8,11 +8,11 @@
     --background: 0 0% 0%; /* Black */
     --foreground: 60 100% 50%; /* Yellow */
 
-    --card: 0 0% 7%; /* Dark black with yellow tint */
-    --card-foreground: 0 0% 98%;
+    --card: 0 0% 100%; /* Changed to white */
+    --card-foreground: 0 0% 20%; /* Changed to dark grey */
 
-    --popover: 0 0% 3%;
-    --popover-foreground: 60 100% 50%;
+    --popover: 0 0% 100%; /* Changed to white */
+    --popover-foreground: 0 0% 20%; /* Changed to dark grey */
 
     --primary: 60 100% 50%; /* Yellow */
     --primary-foreground: 0 0% 0%; /* Black */
@@ -20,8 +20,8 @@
     --secondary: 60 100% 50%; /* Yellow */
     --secondary-foreground: 0 0% 0%; /* Black */
 
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 70%;
+    --muted: 0 0% 90%; /* Changed to light grey */
+    --muted-foreground: 0 0% 40%; /* Changed to medium grey */
 
     --accent: 60 100% 50%; /* Yellow */
     --accent-foreground: 0 0% 0%; /* Black */
@@ -29,8 +29,8 @@
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
 
-    --border: 0 0% 20%;
-    --input: 0 0% 15%;
+    --border: 0 0% 85%; /* Changed to light grey */
+    --input: 0 0% 90%; /* Changed to light grey */
     --ring: 60 100% 50%;
 
     --radius: 0.5rem;
