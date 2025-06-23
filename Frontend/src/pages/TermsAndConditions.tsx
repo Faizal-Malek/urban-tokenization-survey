@@ -53,7 +53,11 @@ const TermsAndConditions = () => {
             <p className="mb-4">Dear Potential Participant,</p>
             
             <p className="mb-4">
-              I am currently pursuing a Master's degree at the School of Engineering and Built Environments at the University of Johannesburg. As part of my research project titled "Tokenization for Sustainable Urban Infrastructure: Advancing Decentralized Management in Bryanston, South Africa," I would like to invite you to take part in an online questionnaire.
+              I am currently pursuing a Master’s degree at the School of Engineering and Built Environments at the University of Johannesburg. As part of my research project titled "Tokenization for Sustainable Urban Infrastructure: Advancing Decentralized Management in Bryanston, South Africa," I would like to invite you to take part in an online questionnaire.
+            </p>
+            
+            <p className="mb-4">
+              Tokenization refers to the process of converting ownership or rights to a real-world asset—such as property, infrastructure, or services—into digital tokens on a blockchain. These tokens can be easily divided, traded, or managed, enabling greater transparency, accessibility, and efficiency in asset management and investment.
             </p>
             
             <p className="mb-4">
@@ -79,7 +83,7 @@ const TermsAndConditions = () => {
             <p className="mb-6">
               Best regards,<br />
               Naeem Razak<br />
-              Master's Candidate – University of Johannesburg
+              Master’s Candidate – University of Johannesburg
             </p>
             
             <p className="text-center mb-6">Thank you for taking the time to participate in this questionnaire.</p>
