@@ -18,9 +18,9 @@ export default function ForgotPassword() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-black via-black to-[#FFF200] flex flex-col">
       <main className="flex-1 flex items-center justify-center mt-28">
-        <div className="bg-white/95 rounded-xl shadow-lg p-8 w-full max-w-md">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Forgot Password</h2>
-          <p className="text-gray-600 mb-6">Enter the email associated with your account.</p>
+        <div className="bg-white/95 rounded-xl shadow-lg p-8 w-full max-w-md text-black">
+          <h2 className="text-2xl font-bold text-black mb-2">Forgot Password</h2>
+          <p className="text-black/80 mb-6">Enter the email associated with your account.</p>
           <form onSubmit={submit}>
             <label className="block text-gray-800 font-medium mb-1">Email</label>
             <input
@@ -35,7 +35,11 @@ export default function ForgotPassword() {
               Send Reset Link
             </button>
           </form>
-          {message && <p className="mt-4 text-center text-sm">{message}</p>}
+          {message && (
+            <p className={`mt-4 text-center text-sm ${message.includes('Error') ? 'text-red-500' : 'text-black'}`}>
+              {message}
+            </p>
+          )}
         </div>
       </main>
     </div>

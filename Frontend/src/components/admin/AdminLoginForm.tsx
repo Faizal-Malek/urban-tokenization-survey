@@ -36,9 +36,9 @@ export const AdminLoginForm = ({ onLoginSuccess, title, description }: AdminLogi
       </nav>
       {/* Centered Login Card */}
       <main className="flex-1 flex items-center justify-center mt-28">
-        <div className="bg-white/95 rounded-xl shadow-lg p-8 w-full max-w-md">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">{title}</h2>
-          <p className="text-gray-600 mb-6">{description}</p>
+        <div className="bg-white/95 rounded-xl shadow-lg p-8 w-full max-w-md text-black">
+          <h2 className="text-2xl font-bold text-black mb-2">{title}</h2>
+          <p className="text-black/80 mb-6">{description}</p>
           <form onSubmit={handleLogin}>
             <label className="block text-gray-800 font-medium mb-1" htmlFor="username">
               Username
@@ -49,7 +49,7 @@ export const AdminLoginForm = ({ onLoginSuccess, title, description }: AdminLogi
               value={username}
               onChange={(e) => setUsername(e.target.value)}
               required
-              className="w-full mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full mb-4 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400 text-black placeholder-gray-500"
               placeholder="Enter your username"
               disabled={isLoading}
             />
@@ -62,10 +62,12 @@ export const AdminLoginForm = ({ onLoginSuccess, title, description }: AdminLogi
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
-              className="w-full mb-6 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full mb-6 px-4 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-yellow-400 text-black placeholder-gray-500"
               placeholder="Enter your password"
               disabled={isLoading}
             />
+            {/* Optionally show errors here in red */}
+            {/* {error && <p className="text-red-500 text-sm mb-2">{error}</p>} */}
             <div className="mt-4 text-center">
             <a href="/forgot-password" className="text-blue-500 hover:underline">Forgot Password?</a>
           </div>
