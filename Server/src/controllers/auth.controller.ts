@@ -7,21 +7,23 @@ import { User } from '../models/user.model';
 import { AppError } from '../middleware/errorHandler';
 
 const signToken = (id: string, role: string) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error('JWT_SECRET is not defined');
+  const secret = process.env.JWT_SECRET;
+  if (!secret) {
+    // throw an AppError so the request handler will forward a consistent error
+    throw new AppError('Server configuration error: JWT_SECRET is not defined', 500);
   }
-  return jwt.sign({ id, role }, process.env.JWT_SECRET as string, {
-    expiresIn: '1d'
+  return jwt.sign({ id, role }, secret, {
+    expiresIn: '1d',
   });
 };
 
 const createSendToken = (user: any, statusCode: number, res: Response) => {
   const token = signToken(user._id, user.role);
 
+  // Ensure cookie expiry uses a sane default (1 day) if env var is missing or invalid
+  const cookieDays = Number(process.env.JWT_COOKIE_EXPIRES_IN) || 1;
   const cookieOptions = {
-    expires: new Date(
-      Date.now() + Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
-    ),
+    expires: new Date(Date.now() + cookieDays * 24 * 60 * 60 * 1000),
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
   };
@@ -72,8 +74,19 @@ export const login = async (
   try {
     const { username, password } = req.body;
 
+    if (!username || !password) {
+      return next(new AppError('Username and password are required', 400));
+    }
+
     const user = await User.findOne({ username }).select('+password');
-    if (!user || !(await user.comparePassword(password))) {
+
+    // If user not found or password isn't stored, return generic auth error
+    if (!user || !user.password) {
+      return next(new AppError('Incorrect username or password', 401));
+    }
+
+    const isMatch = await user.comparePassword(password);
+    if (!isMatch) {
       return next(new AppError('Incorrect username or password', 401));
     }
 

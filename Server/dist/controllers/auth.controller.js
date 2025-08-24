@@ -10,17 +10,21 @@ const nodemailer_1 = __importDefault(require("nodemailer"));
 const user_model_1 = require("../models/user.model");
 const errorHandler_1 = require("../middleware/errorHandler");
 const signToken = (id, role) => {
-    if (!process.env.JWT_SECRET) {
-        throw new Error('JWT_SECRET is not defined');
+    const secret = process.env.JWT_SECRET;
+    if (!secret) {
+        // throw an AppError so the request handler will forward a consistent error
+        throw new errorHandler_1.AppError('Server configuration error: JWT_SECRET is not defined', 500);
     }
-    return jsonwebtoken_1.default.sign({ id, role }, process.env.JWT_SECRET, {
-        expiresIn: '1d'
+    return jsonwebtoken_1.default.sign({ id, role }, secret, {
+        expiresIn: '1d',
     });
 };
 const createSendToken = (user, statusCode, res) => {
     const token = signToken(user._id, user.role);
+    // Ensure cookie expiry uses a sane default (1 day) if env var is missing or invalid
+    const cookieDays = Number(process.env.JWT_COOKIE_EXPIRES_IN) || 1;
     const cookieOptions = {
-        expires: new Date(Date.now() + Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000),
+        expires: new Date(Date.now() + cookieDays * 24 * 60 * 60 * 1000),
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
     };
@@ -56,8 +60,16 @@ exports.register = register;
 const login = async (req, res, next) => {
     try {
         const { username, password } = req.body;
+        if (!username || !password) {
+            return next(new errorHandler_1.AppError('Username and password are required', 400));
+        }
         const user = await user_model_1.User.findOne({ username }).select('+password');
-        if (!user || !(await user.comparePassword(password))) {
+        // If user not found or password isn't stored, return generic auth error
+        if (!user || !user.password) {
+            return next(new errorHandler_1.AppError('Incorrect username or password', 401));
+        }
+        const isMatch = await user.comparePassword(password);
+        if (!isMatch) {
             return next(new errorHandler_1.AppError('Incorrect username or password', 401));
         }
         createSendToken(user, 200, res);
