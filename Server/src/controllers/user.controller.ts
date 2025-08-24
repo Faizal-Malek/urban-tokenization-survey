@@ -47,4 +47,5 @@ export const updateMe = async (
   } catch (error) {
     next(error);
   }
-}; 
+};
+

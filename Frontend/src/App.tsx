@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,17 +10,19 @@ import AdminDashboard from "./pages/AdminDashboard";
 import EnhancedAdminDashboard from "./pages/EnhancedAdminDashboard";
 import AdminSubmissions from "./pages/AdminSubmissions";
 import TermsAndConditions from "./pages/TermsAndConditions";
+import ForgotPassword from "./pages/ForgotPassword";
+import ResetPassword from "./pages/ResetPassword";
 
 const queryClient = new QueryClient();
 
 // Protected Route component
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const termsAccepted = localStorage.getItem("termsAccepted") === "true";
-  
+
   if (!termsAccepted) {
     return <Navigate to="/terms" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -45,6 +46,8 @@ const App = () => (
             <Route path="/admin" element={<EnhancedAdminDashboard />} />
             <Route path="/admin/legacy" element={<AdminDashboard />} />
             <Route path="/admin/submissions" element={<AdminSubmissions />} />
+            <Route path="/forgot-password" element={<ForgotPassword />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>

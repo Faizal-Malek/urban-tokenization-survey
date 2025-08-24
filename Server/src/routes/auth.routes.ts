@@ -31,5 +31,7 @@ router.post(
 );
 
 router.post('/logout', logout);
+router.post('/forgot-password', authController.forgotPassword);
+router.post('/reset-password', authController.resetPassword);
 
-export default router; 
+export default router;

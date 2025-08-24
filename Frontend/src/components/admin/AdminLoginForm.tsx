@@ -66,6 +66,9 @@ export const AdminLoginForm = ({ onLoginSuccess, title, description }: AdminLogi
               placeholder="Enter your password"
               disabled={isLoading}
             />
+            <div className="mt-4 text-center">
+            <a href="/forgot-password" className="text-blue-500 hover:underline">Forgot Password?</a>
+          </div>
             <button
               type="submit"
               className={`w-full bg-yellow-300 hover:bg-yellow-400 text-black font-bold py-2 rounded transition ${isLoading ? 'opacity-70 cursor-not-allowed' : ''}`}
