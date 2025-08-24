@@ -1,6 +1,6 @@
 import express from 'express';
 import { body } from 'express-validator';
-import { login, register, logout } from '../controllers/auth.controller';
+import * as authController from '../controllers/auth.controller';
 import { validateRequest } from '../middleware/validateRequest';
 
 const router = express.Router();
@@ -17,7 +17,7 @@ router.post(
       .withMessage('Password must be at least 8 characters long'),
   ],
   validateRequest,
-  register
+  authController.register
 );
 
 router.post(
@@ -27,10 +27,10 @@ router.post(
     body('password').notEmpty().withMessage('Password is required'),
   ],
   validateRequest,
-  login
+  authController.login
 );
 
-router.post('/logout', logout);
+router.post('/logout', authController.logout);
 router.post('/forgot-password', authController.forgotPassword);
 router.post('/reset-password', authController.resetPassword);
 

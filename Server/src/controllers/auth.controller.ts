@@ -3,7 +3,8 @@ import jwt from 'jsonwebtoken';
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
 import nodemailer from 'nodemailer';
-import User from '../models/user.model';
+import { User } from '../models/user.model';
+import { AppError } from '../middleware/errorHandler';
 
 const signToken = (id: string, role: string) => {
   if (!process.env.JWT_SECRET) {
