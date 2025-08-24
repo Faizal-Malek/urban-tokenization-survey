@@ -1,5 +1,6 @@
 import mongoose, { Document, Schema } from 'mongoose';
-import bcrypt from 'bcryptjs';
+// import bcrypt from 'bcryptjs'; // commented out for MD5 demo; uncomment to restore bcrypt
+import crypto from 'crypto';
 
 export interface IUser extends Document {
   username: string;
@@ -53,8 +54,15 @@ userSchema.pre('save', async function (this: IUser & Document, next: any) {
   const doc = this as IUser & Document;
   if (!doc.isModified('password')) return next();
 
-  const salt = await bcrypt.genSalt(10);
-  doc.password = await bcrypt.hash(doc.password, salt);
+  // --- bcrypt implementation (commented out for presentation) ---
+  // const salt = await bcrypt.genSalt(10);
+  // doc.password = await bcrypt.hash(doc.password, salt);
+  // next();
+  // -------------------------------------------------------------
+
+  // MD5 demonstration - NOT SECURE. Replace with bcrypt in production.
+  const md5 = crypto.createHash('md5').update(String(doc.password)).digest('hex');
+  doc.password = md5;
   next();
 });
 
@@ -63,7 +71,11 @@ userSchema.methods.comparePassword = async function (
   this: IUser & Document,
   candidatePassword: string
 ): Promise<boolean> {
-  return bcrypt.compare(candidatePassword, this.password);
+  // MD5 comparison for presentation only. Not secure.
+  const candidateHash = crypto.createHash('md5').update(String(candidatePassword)).digest('hex');
+  return candidateHash === this.password;
+  // Original bcrypt implementation (commented out):
+  // return bcrypt.compare(candidatePassword, this.password);
 };
 
 export const User = mongoose.model<IUser>('User', userSchema);
