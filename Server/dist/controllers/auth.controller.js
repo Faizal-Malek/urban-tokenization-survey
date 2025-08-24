@@ -3,8 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.logout = exports.login = exports.register = void 0;
+exports.resetPassword = exports.forgotPassword = exports.logout = exports.login = exports.register = void 0;
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
+const crypto_1 = __importDefault(require("crypto"));
+const bcrypt_1 = __importDefault(require("bcrypt"));
+const nodemailer_1 = __importDefault(require("nodemailer"));
 const user_model_1 = require("../models/user.model");
 const errorHandler_1 = require("../middleware/errorHandler");
 const signToken = (id, role) => {
@@ -73,3 +76,52 @@ const logout = (req, res) => {
     res.status(200).json({ status: 'success' });
 };
 exports.logout = logout;
+// Forgot Password Handler
+const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const user = await user_model_1.User.findOne({ email });
+    if (!user)
+        return res.status(404).json({ message: 'User not found' });
+    const token = crypto_1.default.randomBytes(32).toString('hex');
+    const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
+    user.resetPasswordToken = token;
+    user.resetPasswordExpires = expires;
+    await user.save();
+    const transporter = nodemailer_1.default.createTransport({
+        host: process.env.SMTP_HOST,
+        port: 465,
+        secure: true,
+        auth: {
+            user: process.env.SMTP_USER,
+            pass: process.env.SMTP_PASS,
+        },
+    });
+    const resetUrl = `https://mywebsite.com/reset-password?token=${token}`;
+    const mailOptions = {
+        from: `"Planera" <${process.env.SMTP_USER}>`,
+        to: user.email,
+        subject: 'Password Reset Request',
+        html: `<p>You requested a password reset.</p>
+           <p><a href="${resetUrl}">Click here to reset your password</a></p>
+           <p>This link will expire in 1 hour.</p>`,
+    };
+    await transporter.sendMail(mailOptions);
+    res.json({ message: 'Password reset email sent' });
+};
+exports.forgotPassword = forgotPassword;
+// Reset Password Handler
+const resetPassword = async (req, res) => {
+    const { token, password } = req.body;
+    const user = await user_model_1.User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpires: { $gt: new Date() },
+    });
+    if (!user)
+        return res.status(400).json({ message: 'Invalid or expired token' });
+    user.password = await bcrypt_1.default.hash(password, 10);
+    user.resetPasswordToken = null;
+    user.resetPasswordExpires = null;
+    await user.save();
+    res.json({ message: 'Password has been reset' });
+};
+exports.resetPassword = resetPassword;

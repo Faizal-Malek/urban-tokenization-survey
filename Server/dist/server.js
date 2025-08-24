@@ -31,14 +31,16 @@ const corsOptions = {
             'https://urban-tokenization-survey.vercel.app',
             'https://urban-tokenization-survey-git-main-faizals-projects-bee3353c.vercel.app',
             'http://localhost:3000',
-            'http://localhost:5173',
+            // 'http://localhost:5173',
             'http://127.0.0.1:3000',
             'http://127.0.0.1:5173',
             // Allow any localhost port for development
             /^http:\/\/localhost:\d+$/,
             /^http:\/\/127\.0\.0\.1:\d+$/,
             // Allow work environment URLs
-            /^https:\/\/work-\d+-\w+\.prod-runtime\.all-hands\.dev$/
+            /^https:\/\/work-\d+-\w+\.prod-runtime\.all-hands\.dev$/,
+            // Allow any Vercel deployment URLs
+            /^https:\/\/.*\.vercel\.app$/
         ];
         const isAllowed = allowedOrigins.some(allowed => {
             if (typeof allowed === 'string') {
@@ -57,16 +59,38 @@ const corsOptions = {
         }
     },
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Cache-Control', 'Accept']
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH'],
+    allowedHeaders: [
+        'Content-Type',
+        'Authorization',
+        'Cache-Control',
+        'Accept',
+        'Origin',
+        'X-Requested-With',
+        'Access-Control-Allow-Headers',
+        'Access-Control-Allow-Origin'
+    ],
+    exposedHeaders: ['Authorization'],
+    optionsSuccessStatus: 200 // For legacy browser support
 };
 app.use((0, cors_1.default)(corsOptions));
+// Handle preflight requests explicitly
+app.options('*', (0, cors_1.default)(corsOptions));
 // Rate limiting
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100 // limit each IP to 100 requests per windowMs
 });
 app.use(limiter);
+// Health check endpoint
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'success',
+        message: 'Server is running',
+        timestamp: new Date().toISOString(),
+        environment: process.env.NODE_ENV || 'development'
+    });
+});
 // Routes
 app.use('/api/auth', auth_routes_1.default);
 app.use('/api/users', user_routes_1.default);

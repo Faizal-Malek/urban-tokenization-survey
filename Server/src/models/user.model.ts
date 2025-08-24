@@ -4,6 +4,7 @@ import bcrypt from 'bcrypt';
 export interface IUser extends Document {
   username: string;
   password: string;
+  email?: string;
   role: 'admin' | 'user';
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +26,14 @@ const userSchema = new Schema<IUser>(
       required: [true, 'Password is required'],
       minlength: 8,
       select: false,
+    },
+    email: {
+      type: String,
+      required: false,
+      unique: true,
+      sparse: true,
+      trim: true,
+      lowercase: true,
     },
     role: {
       type: String,
