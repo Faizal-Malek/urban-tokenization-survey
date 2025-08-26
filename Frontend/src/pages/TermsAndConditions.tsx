@@ -77,7 +77,7 @@ const TermsAndConditions = () => {
             </p>
 
             <p className="mb-4">
-              This questionnaire, which will be available from May the 10 2025
+              This questionnaire, which will be available from August the 10 2025
               to August the 30, 2025, will take about 15-20 minutes to complete
               and utilizes a 5-point Likert-type scale, using an online google
               doc questionnaire form. Its purpose is to identify the challenges
